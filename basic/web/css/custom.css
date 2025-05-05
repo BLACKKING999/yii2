@@ -1,0 +1,353 @@
+/* Colores principales */
+:root {
+    --primary-color: #c10000;
+    --secondary-color: #ffffff;
+    --accent-color: #8a0000;
+    --text-color: #333333;
+    --light-gray: #f8f9fa;
+    --dark-gray: #343a40;
+}
+
+/* Estilo general */
+body {
+    font-family: 'Roboto', sans-serif;
+    background-color: var(--light-gray);
+    color: var(--text-color);
+    padding: 0;
+    margin: 0;
+    overflow-x: hidden;
+}
+
+/* Navbar lateral */
+#sidebar {
+    position: fixed;
+    width: 250px;
+    height: 100%;
+    left: -250px;
+    top: 0;
+    background-color: var(--primary-color);
+    transition: all 0.3s;
+    z-index: 1000;
+    overflow-y: auto;
+    box-shadow: 3px 0 5px rgba(0, 0, 0, 0.1);
+}
+
+#sidebar.active {
+    left: 0;
+}
+
+#sidebar .sidebar-header {
+    padding: 20px;
+    background-color: var(--accent-color);
+    text-align: center;
+}
+
+#sidebar .sidebar-header h3 {
+    color: white;
+    margin: 0;
+    font-size: 1.5rem;
+}
+
+#sidebar ul.components {
+    padding: 20px 0;
+    border-bottom: 1px solid var(--accent-color);
+}
+
+#sidebar ul li a {
+    padding: 10px 20px;
+    font-size: 1.1em;
+    display: block;
+    color: var(--secondary-color);
+    text-decoration: none;
+    transition: all 0.3s;
+}
+
+#sidebar ul li a:hover {
+    background-color: var(--accent-color);
+}
+
+#sidebar ul li.active > a {
+    background-color: var(--accent-color);
+}
+
+/* Dropdown */
+#sidebar ul li ul.collapse {
+    background-color: var(--accent-color);
+    max-height: 0;
+    overflow: hidden;
+    transition: max-height 0.3s ease-out;
+}
+
+#sidebar ul li ul.collapse.show {
+    max-height: 500px; /* Valor suficientemente alto para todos los submenús */
+}
+
+#sidebar ul li ul li a {
+    padding-left: 30px;
+}
+
+/* Iconos del sidebar */
+#sidebar ul li a i {
+    margin-right: 10px;
+    width: 20px;
+    text-align: center;
+}
+
+/* Botón para mostrar/ocultar sidebar */
+#sidebarCollapse {
+    position: fixed;
+    top: 15px;
+    left: 15px;
+    z-index: 1001;
+    background-color: var(--primary-color);
+    border: none;
+    color: white;
+    border-radius: 50%;
+    width: 40px;
+    height: 40px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+}
+
+#sidebarCollapse:hover {
+    background-color: var(--accent-color);
+}
+
+/* Contenido principal */
+#content {
+    width: 100%;
+    min-height: 100vh;
+    transition: all 0.3s;
+    position: relative;
+    padding-top: 60px;
+}
+
+#content.sidebar-active {
+    margin-left: 250px;
+}
+
+/* Header personalizado */
+.main-header {
+    background-color: var(--primary-color);
+    color: white;
+    padding: 15px 0;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+    position: fixed;
+    width: 100%;
+    top: 0;
+    z-index: 999;
+    transition: all 0.3s;
+}
+
+.main-header.sidebar-active {
+    margin-left: 250px;
+    width: calc(100% - 250px);
+}
+
+.main-header .container {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.logo {
+    font-size: 1.5rem;
+    font-weight: bold;
+    color: white;
+    text-decoration: none;
+}
+
+.logo:hover {
+    color: white;
+    text-decoration: none;
+}
+
+/* Botones y elementos UI */
+.btn-primary {
+    background-color: var(--primary-color);
+    border-color: var(--primary-color);
+}
+
+.btn-primary:hover {
+    background-color: var(--accent-color);
+    border-color: var(--accent-color);
+}
+
+.btn-outline-primary {
+    color: var(--primary-color);
+    border-color: var(--primary-color);
+}
+
+.btn-outline-primary:hover {
+    background-color: var(--primary-color);
+    color: white;
+}
+
+/* Tarjetas */
+.card {
+    border-radius: 8px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    border: none;
+    margin-bottom: 20px;
+    transition: transform 0.3s;
+}
+
+.card:hover {
+    transform: translateY(-5px);
+}
+
+.card-header {
+    background-color: var(--primary-color);
+    color: white;
+    border-radius: 8px 8px 0 0 !important;
+    padding: 15px;
+}
+
+/* Tablas */
+.table {
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+    border-radius: 8px;
+    overflow: hidden;
+}
+
+.table thead th {
+    background-color: var(--primary-color);
+    color: white;
+    border-bottom: none;
+}
+
+.table-striped tbody tr:nth-of-type(odd) {
+    background-color: rgba(193, 0, 0, 0.05);
+}
+
+/* Footer personalizado */
+#footer {
+    background-color: var(--dark-gray);
+    color: white;
+    padding: 20px 0;
+    margin-top: 30px;
+}
+
+#footer a {
+    color: var(--primary-color);
+}
+
+/* Alertas y notificaciones */
+.alert-success {
+    background-color: #d4edda;
+    border-color: #c3e6cb;
+    color: #155724;
+}
+
+.alert-danger {
+    background-color: #f8d7da;
+    border-color: #f5c6cb;
+    color: #721c24;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+    #sidebar {
+        width: 80%;
+        left: -80%;
+    }
+    
+    #content.sidebar-active, 
+    .main-header.sidebar-active {
+        margin-left: 80%;
+        width: calc(100% - 80%);
+    }
+    
+    .main-header .container {
+        padding-left: 60px;
+    }
+}
+
+/* Formularios */
+.form-control:focus {
+    border-color: var(--primary-color);
+    box-shadow: 0 0 0 0.2rem rgba(193, 0, 0, 0.25);
+}
+
+/* Breadcrumbs */
+.breadcrumb {
+    background-color: var(--secondary-color);
+    border-radius: 4px;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+}
+
+.breadcrumb-item.active {
+    color: var(--primary-color);
+}
+
+/* Animaciones */
+.animated-icon {
+    transition: all 0.3s;
+}
+
+.animated-icon:hover {
+    transform: scale(1.1);
+}
+
+/* Login Form */
+.login-container {
+    max-width: 400px;
+    margin: 50px auto;
+    padding: 30px;
+    background-color: var(--secondary-color);
+    border-radius: 8px;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+}
+
+.login-container .card-header {
+    text-align: center;
+    font-size: 1.5rem;
+}
+
+.social-login-btn {
+    width: 100%;
+    margin-bottom: 10px;
+    text-align: center;
+    padding: 10px;
+}
+
+/* Hero section para la página de inicio */
+.hero-section {
+    background: linear-gradient(rgba(193, 0, 0, 0.8), rgba(193, 0, 0, 0.9)), url('../img/biblioteca-bg.jpg');
+    background-size: cover;
+    background-position: center;
+    color: var(--secondary-color);
+    padding: 80px 0;
+    margin-bottom: 30px;
+    border-radius: 10px;
+    text-align: center;
+}
+
+.hero-section h1 {
+    font-size: 2.5rem;
+    margin-bottom: 20px;
+}
+
+.hero-section p {
+    font-size: 1.2rem;
+    margin-bottom: 30px;
+}
+
+/* Overlay para cuando el sidebar está activo en móviles */
+.overlay {
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: rgba(0, 0, 0, 0.5);
+    z-index: 999;
+}
+
+.overlay.active {
+    display: block;
+}
