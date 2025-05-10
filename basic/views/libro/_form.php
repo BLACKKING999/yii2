@@ -16,7 +16,16 @@ $isNewRecord = $model->isNewRecord;
 
     <div class="row">
         <div class="col-md-6">
+            <?= $form->field($model, 'isbn')->textInput(['maxlength' => true]) ?>
+        </div>
+        <div class="col-md-6">
             <?= $form->field($model, 'titulo')->textInput(['maxlength' => true]) ?>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-md-6">
+            <?= $form->field($model, 'editorial')->textInput(['maxlength' => true]) ?>
         </div>
         <div class="col-md-6">
             <?= $form->field($model, 'anio_publicacion')->textInput(['type' => 'number']) ?>
@@ -40,8 +49,29 @@ $isNewRecord = $model->isNewRecord;
 
     <div class="row">
         <div class="col-md-6">
+            <?= $form->field($model, 'num_paginas')->textInput(['type' => 'number']) ?>
+        </div>
+        <div class="col-md-6">
+            <?= $form->field($model, 'idioma')->textInput(['maxlength' => true]) ?>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-md-6">
+            <?= $form->field($model, 'ubicacion_fisica')->textInput(['maxlength' => true]) ?>
+        </div>
+        <div class="col-md-6">
             <?= $form->field($model, 'disponible')->checkbox() ?>
         </div>
+    </div>
+
+    <div class="row">
+        <div class="col-md-12">
+            <?= $form->field($model, 'descripcion')->textarea(['rows' => 6]) ?>
+        </div>
+    </div>
+
+    <div class="row">
         <div class="col-md-6">
             <?= $form->field($model, 'imagenFile')->fileInput(['accept' => 'image/*']) ?>
             <?php if (!$isNewRecord && $model->imagen_portada): ?>

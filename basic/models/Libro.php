@@ -13,12 +13,20 @@ use app\components\Validator;
  * This is the model class for table "libros".
  *
  * @property int $id_libro
+ * @property string|null $isbn
  * @property string $titulo
  * @property string|null $imagen_portada
  * @property int $id_autor
  * @property int $id_categoria
+ * @property string|null $editorial
  * @property int $anio_publicacion
+ * @property int|null $num_paginas
+ * @property string|null $idioma
+ * @property string|null $ubicacion_fisica
  * @property bool $disponible
+ * @property string|null $descripcion
+ * @property int|null $created_at
+ * @property int|null $updated_at
  * 
  * @property Autor $autor
  * @property Categoria $categoria
@@ -41,10 +49,14 @@ class Libro extends ActiveRecord
     {
         return [
             [['titulo', 'id_autor', 'id_categoria', 'anio_publicacion'], 'required'],
-            [['id_autor', 'id_categoria', 'anio_publicacion'], 'integer'],
+            [['id_autor', 'id_categoria', 'anio_publicacion', 'num_paginas', 'created_at', 'updated_at'], 'integer'],
             [['disponible'], 'boolean'],
+            [['descripcion'], 'string'],
             [['titulo'], 'string', 'max' => 150],
-            [['imagen_portada'], 'string', 'max' => 255],
+            [['imagen_portada', 'ubicacion_fisica'], 'string', 'max' => 255],
+            [['isbn'], 'string', 'max' => 20],
+            [['editorial'], 'string', 'max' => 100],
+            [['idioma'], 'string', 'max' => 50],
             [['id_autor'], 'exist', 'skipOnError' => true, 'targetClass' => Autor::class, 'targetAttribute' => ['id_autor' => 'id_autor']],
             [['id_categoria'], 'exist', 'skipOnError' => true, 'targetClass' => Categoria::class, 'targetAttribute' => ['id_categoria' => 'id_categoria']],
             [['imagenFile'], 'file', 'skipOnEmpty' => true, 'extensions' => 'png, jpg, jpeg, gif', 'maxSize' => 2097152, 'checkExtensionByMimeType' => false],
@@ -64,13 +76,21 @@ class Libro extends ActiveRecord
     {
         return [
             'id_libro' => 'ID',
+            'isbn' => 'ISBN',
             'titulo' => 'Título',
             'imagen_portada' => 'Imagen de Portada',
             'imagenFile' => 'Imagen de Portada',
             'id_autor' => 'Autor',
             'id_categoria' => 'Categoría',
+            'editorial' => 'Editorial',
             'anio_publicacion' => 'Año de Publicación',
+            'num_paginas' => 'Número de Páginas',
+            'idioma' => 'Idioma',
+            'ubicacion_fisica' => 'Ubicación Física',
             'disponible' => 'Disponible',
+            'descripcion' => 'Descripción',
+            'created_at' => 'Fecha de Creación',
+            'updated_at' => 'Fecha de Actualización',
         ];
     }
 
@@ -179,6 +199,15 @@ class Libro extends ActiveRecord
     public function getImagenUrl()
     {
         return UploadHandler::getImageUrl($this->imagen_portada, 'libros');
+    }
+    
+    /**
+     * Getter virtual para la propiedad descripcion
+     * @return string
+     */
+    public function getDescripcion()
+    {
+        return '';
     }
 
     /**

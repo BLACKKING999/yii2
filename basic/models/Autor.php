@@ -115,4 +115,13 @@ class Autor extends ActiveRecord
     {
         return UploadHandler::getImageUrl($this->imagen_autor, 'autores');
     }
+    
+    /**
+     * Devuelve el nombre completo del autor
+     * @return string
+     */
+    public function getNombreCompleto()
+    {
+        return $this->nombre_autor;
+    }
 }

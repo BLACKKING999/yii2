@@ -51,4 +51,14 @@ class Categoria extends ActiveRecord
     {
         return $this->hasMany(Libro::class, ['id_categoria' => 'id_categoria']);
     }
+    
+    /**
+     * Obtiene el número de libros en esta categoría
+     *
+     * @return int
+     */
+    public function getLibrosCount()
+    {
+        return $this->getLibros()->count();
+    }
 } 

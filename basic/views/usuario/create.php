@@ -23,7 +23,7 @@ $this->params['breadcrumbs'][] = $this->title;
                         <?= $form->field($model, 'nombre')->textInput(['maxlength' => true]) ?>
                     </div>
                     <div class="col-md-6">
-                        <?= $form->field($model, 'correo')->textInput(['maxlength' => true]) ?>
+                        <?= $form->field($model, 'email')->textInput(['maxlength' => true]) ?>
                     </div>
                 </div>
 

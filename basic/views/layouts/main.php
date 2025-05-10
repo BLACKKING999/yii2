@@ -51,6 +51,13 @@ $this->registerLinkTag(['rel' => 'icon', 'type' => 'image/x-icon', 'href' => Yii
             </a>
         </li>
         <li>
+            <a href="<?= \yii\helpers\Url::to(['/catalogo/index']) ?>">
+                <i class="fas fa-book-open"></i> Catálogo
+            </a>
+        </li>
+        
+        <?php if (!Yii::$app->user->isGuest && Yii::$app->user->identity->puedeAdministrarLibros()): ?>
+        <li>
             <a href="#librosSubmenu" class="dropdown-toggle" data-bs-toggle="collapse" aria-expanded="false">
                 <i class="fas fa-book"></i> Libros
                 <i class="fas fa-angle-down float-end mt-1"></i>
@@ -78,33 +85,73 @@ $this->registerLinkTag(['rel' => 'icon', 'type' => 'image/x-icon', 'href' => Yii
                 </li>
             </ul>
         </li>
+        <?php endif; ?>
+        <?php if (!Yii::$app->user->isGuest): ?>
         <li>
             <a href="#usuariosSubmenu" class="dropdown-toggle" data-bs-toggle="collapse" aria-expanded="false">
                 <i class="fas fa-users"></i> Usuarios
                 <i class="fas fa-angle-down float-end mt-1"></i>
             </a>
             <ul class="collapse list-unstyled" id="usuariosSubmenu">
+                <?php if (!Yii::$app->user->isGuest && Yii::$app->user->identity->puedeAdministrarUsuarios()): ?>
                 <li>
-                    <a href="<?= \yii\helpers\Url::to(['/usuario/index']) ?>">
-                        <i class="fas fa-list"></i> Ver Usuarios
+                    <a href="<?= \yii\helpers\Url::to(['/user/index']) ?>">
+                        <i class="fas fa-list"></i> Gestionar Usuarios
                     </a>
                 </li>
                 <li>
-                    <a href="<?= \yii\helpers\Url::to(['/usuario/create']) ?>">
-                        <i class="fas fa-user-plus"></i> Nuevo Usuario
+                    <a href="<?= \yii\helpers\Url::to(['/registro/index']) ?>">
+                        <i class="fas fa-user-plus"></i> Registrar Usuarios
                     </a>
                 </li>
+                <li>
+                    <a href="<?= \yii\helpers\Url::to(['/rol/index']) ?>">
+                        <i class="fas fa-user-tag"></i> Roles y Permisos
+                    </a>
+                </li>
+                <li>
+                    <a href="<?= \yii\helpers\Url::to(['/usuario-estudiante/index']) ?>">
+                        <i class="fas fa-graduation-cap"></i> Estudiantes
+                    </a>
+                </li>
+                <li>
+                    <a href="<?= \yii\helpers\Url::to(['/usuario-profesor/index']) ?>">
+                        <i class="fas fa-chalkboard-teacher"></i> Profesores
+                    </a>
+                </li>
+                <li>
+                    <a href="<?= \yii\helpers\Url::to(['/usuario-personal/index']) ?>">
+                        <i class="fas fa-id-card-alt"></i> Personal
+                    </a>
+                </li>
+                <?php endif; ?>
+                <?php if (!Yii::$app->user->isGuest): ?>
+                <li>
+                    <a href="<?= \yii\helpers\Url::to(['/user/view', 'id' => Yii::$app->user->identity->id_usuario]) ?>">
+                        <i class="fas fa-user-circle"></i> Mi Perfil
+                    </a>
+                </li>
+                <li>
+                    <a href="<?= \yii\helpers\Url::to(['/user/update', 'id' => Yii::$app->user->identity->id_usuario]) ?>">
+                        <i class="fas fa-user-edit"></i> Editar Perfil
+                    </a>
+                </li>
+                <?php endif; ?>
             </ul>
         </li>
+        <?php endif; ?>
+        
+        <?php if (!Yii::$app->user->isGuest): ?>
         <li>
             <a href="#prestamosSubmenu" class="dropdown-toggle" data-bs-toggle="collapse" aria-expanded="false">
                 <i class="fas fa-exchange-alt"></i> Préstamos
                 <i class="fas fa-angle-down float-end mt-1"></i>
             </a>
             <ul class="collapse list-unstyled" id="prestamosSubmenu">
+                <?php if (!Yii::$app->user->isGuest && Yii::$app->user->identity->puedeAdministrarPrestamos()): ?>
                 <li>
                     <a href="<?= \yii\helpers\Url::to(['/prestamo/index']) ?>">
-                        <i class="fas fa-list"></i> Ver Préstamos
+                        <i class="fas fa-list"></i> Ver Todos los Préstamos
                     </a>
                 </li>
                 <li>
@@ -112,14 +159,34 @@ $this->registerLinkTag(['rel' => 'icon', 'type' => 'image/x-icon', 'href' => Yii
                         <i class="fas fa-plus"></i> Nuevo Préstamo
                     </a>
                 </li>
+                <?php endif; ?>
+                <?php if (!Yii::$app->user->isGuest): ?>
+                <li>
+                    <a href="<?= \yii\helpers\Url::to(['/prestamo/mis-prestamos']) ?>">
+                        <i class="fas fa-book-reader"></i> Mis Préstamos
+                    </a>
+                </li>
+                <li>
+                    <a href="<?= \yii\helpers\Url::to(['/prestamo/mis-reservas']) ?>">
+                        <i class="fas fa-bookmark"></i> Mis Reservas
+                    </a>
+                </li>
+                <?php endif; ?>
             </ul>
         </li>
+        <?php endif; ?>
         <li class="mt-5">
             <?php if (Yii::$app->user->isGuest): ?>
                 <a href="<?= \yii\helpers\Url::to(['/site/login']) ?>">
                     <i class="fas fa-sign-in-alt"></i> Iniciar Sesión
                 </a>
             <?php else: ?>
+                <div class="user-role mb-2 text-muted ps-3">
+                    <small>
+                        <i class="fas fa-user-tag"></i>
+                        <?= Yii::$app->user->identity->rol ? Yii::$app->user->identity->rol->nombre_rol : 'Usuario' ?>
+                    </small>
+                </div>
                 <a href="<?= \yii\helpers\Url::to(['/site/logout']) ?>" data-method="post">
                     <i class="fas fa-sign-out-alt"></i> Cerrar Sesión (<?= Yii::$app->user->identity->username ?>)
                 </a>
@@ -138,7 +205,7 @@ $this->registerLinkTag(['rel' => 'icon', 'type' => 'image/x-icon', 'href' => Yii
         <?php if (!Yii::$app->user->isGuest): ?>
             <div class="user-info text-white">
                 <i class="fas fa-user-circle"></i> 
-                Bienvenido, <?= Html::encode(Yii::$app->user->identity->username) ?>
+                Bienvenido, <?= Html::encode(Yii::$app->user->identity->nombre ?: Yii::$app->user->identity->username) ?>
             </div>
         <?php endif; ?>
     </div>

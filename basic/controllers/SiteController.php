@@ -10,7 +10,9 @@ use yii\filters\VerbFilter;
 use yii\helpers\Url;
 use app\models\LoginForm;
 use app\models\ContactForm;
-use app\models\Usuario;
+use app\models\User;
+use app\models\AutenticacionExterna;
+use app\models\Rol;
 use app\components\FirebaseService;
 
 class SiteController extends Controller
@@ -23,14 +25,17 @@ class SiteController extends Controller
         return [
             'access' => [
                 'class' => AccessControl::class,
-                'only' => ['logout'],
+                'only' => ['logout', 'dashboard'],
                 'rules' => [
                     [
-                        'actions' => ['logout'],
+                        'actions' => ['logout', 'dashboard'],
                         'allow' => true,
                         'roles' => ['@'],
                     ],
                 ],
+                'denyCallback' => function($rule, $action) {
+                    return $this->redirect(['site/login']);
+                },
             ],
             'verbs' => [
                 'class' => VerbFilter::class,
@@ -64,6 +69,12 @@ class SiteController extends Controller
      */
     public function actionIndex()
     {
+        // Si el usuario ha iniciado sesión, mostrar el dashboard
+        if (!Yii::$app->user->isGuest) {
+            return $this->render('dashboard');
+        }
+        
+        // Si no ha iniciado sesión, mostrar la página principal
         return $this->render('index');
     }
 
@@ -79,8 +90,14 @@ class SiteController extends Controller
         }
 
         $model = new LoginForm();
-        if ($model->load(Yii::$app->request->post()) && $model->login()) {
-            return $this->goBack();
+        if ($model->load(Yii::$app->request->post())) {
+            if ($model->login()) {
+                $nombreUsuario = Yii::$app->user->identity->nombre ?: Yii::$app->user->identity->username;
+                Yii::$app->session->setFlash('success', 'Bienvenido, ' . $nombreUsuario);
+                return $this->goBack();
+            } else {
+                // El mensaje de error ya se muestra en el formulario
+            }
         }
 
         $model->password = '';
@@ -175,36 +192,31 @@ class SiteController extends Controller
                 return $this->redirect(['site/login']);
             }
             
-            // Buscar usuario por Google ID o correo electrónico
-            $usuario = Usuario::findOne(['google_id' => $userData['id']]);
+            // Usar el modelo de login externo para gestionar el proceso
+            $loginForm = new LoginForm();
+            $result = $loginForm->loginExternal(
+                AutenticacionExterna::PROVEEDOR_GOOGLE, 
+                $userData['id'], 
+                [
+                    'email' => $userData['email'],
+                    'name' => $userData['name']
+                ],
+                $tokenData['access_token']
+            );
             
-            if (!$usuario) {
-                // Buscar por correo
-                $usuario = Usuario::findOne(['correo' => $userData['email']]);
-                
-                if (!$usuario) {
-                    // Crear nuevo usuario
-                    $usuario = new Usuario();
-                    $usuario->nombre = $userData['name'];
-                    $usuario->correo = $userData['email'];
-                    $usuario->google_id = $userData['id'];
-                    $usuario->es_google = true;
-                    $usuario->contrasena = Yii::$app->security->generateRandomString(12); // Contraseña aleatoria
-                    
-                    if (!$usuario->save()) {
-                        Yii::$app->session->setFlash('error', 'Error al crear usuario con Google');
-                        return $this->redirect(['site/login']);
-                    }
-                } else {
-                    // Actualizar usuario existente con datos de Google
-                    $usuario->google_id = $userData['id'];
-                    $usuario->es_google = true;
-                    $usuario->save();
-                }
+            if ($result instanceof User) {
+                // Si es una instancia de User, es un usuario nuevo creado
+                Yii::$app->user->login($result, 3600*24*30);
+                Yii::$app->session->setFlash('success', 'Bienvenido ' . $result->nombre . '. Tu cuenta ha sido creada correctamente.');
+            } elseif ($result) {
+                // Login exitoso
+                $nombreUsuario = Yii::$app->user->identity->nombre ?: Yii::$app->user->identity->username;
+                Yii::$app->session->setFlash('success', 'Bienvenido, ' . $nombreUsuario);
+            } else {
+                // Error en login
+                Yii::$app->session->setFlash('error', 'Error de autenticación con Google');
+                return $this->redirect(['site/login']);
             }
-            
-            // Iniciar sesión
-            Yii::$app->user->login($usuario);
             
             // Redireccionar a una página específica en lugar de usar goHome()
             return $this->redirect(['/site/index']);

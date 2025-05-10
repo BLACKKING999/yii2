@@ -9,13 +9,37 @@ $this->title = 'Biblioteca Virtual';
 ?>
 
 <div class="site-index">
-    <div class="jumbotron text-center bg-light">
+    <div class="jumbotron text-center bg-light p-5 mb-4">
         <h1 class="display-4">Biblioteca Virtual</h1>
         <p class="lead">Sistema de gestión de libros, préstamos y usuarios</p>
+        
+        <?php if (Yii::$app->user->isGuest): ?>
+            <p class="mt-4">
+                <?= Html::a('Iniciar Sesión', ['/site/login'], ['class' => 'btn btn-primary btn-lg']) ?>
+            </p>
+        <?php endif; ?>
     </div>
 
     <div class="container">
+        <!-- Catálogo - Visible para todos -->
+        <div class="row mb-4">
+            <div class="col-12">
+                <div class="card shadow-sm">
+                    <div class="card-body text-center">
+                        <i class="fas fa-search fa-3x mb-3 text-primary"></i>
+                        <h2 class="card-title">Explora Nuestro Catálogo</h2>
+                        <p class="card-text">Descubre nuestra colección de libros disponibles para préstamo.</p>
+                        <div class="mt-3">
+                            <?= Html::a('Ver Catálogo', ['/catalogo/index'], ['class' => 'btn btn-primary btn-lg']) ?>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <?php if (!Yii::$app->user->isGuest): ?>
         <div class="row">
+            <?php if (Yii::$app->user->identity->puedeAdministrarLibros()): ?>
             <div class="col-md-4 mb-4">
                 <div class="card h-100 shadow-sm">
                     <div class="card-body text-center">
@@ -23,13 +47,14 @@ $this->title = 'Biblioteca Virtual';
                         <h3 class="card-title">Libros</h3>
                         <p class="card-text">Gestiona el catálogo de libros, autores y categorías.</p>
                         <div class="mt-3">
-                            <?= Html::a('Ver Libros', ['/libro/index'], ['class' => 'btn btn-primary']) ?>
-                            <?= Html::a('Nuevo Libro', ['/libro/create'], ['class' => 'btn btn-outline-primary']) ?>
+                            <?= Html::a('Gestionar Libros', ['/libro/index'], ['class' => 'btn btn-primary']) ?>
                         </div>
                     </div>
                 </div>
             </div>
+            <?php endif; ?>
             
+            <?php if (Yii::$app->user->identity->puedeAdministrarUsuarios()): ?>
             <div class="col-md-4 mb-4">
                 <div class="card h-100 shadow-sm">
                     <div class="card-body text-center">
@@ -37,28 +62,28 @@ $this->title = 'Biblioteca Virtual';
                         <h3 class="card-title">Usuarios</h3>
                         <p class="card-text">Administra los usuarios registrados en el sistema.</p>
                         <div class="mt-3">
-                            <?= Html::a('Ver Usuarios', ['/usuario/index'], ['class' => 'btn btn-success']) ?>
-                            <?= Html::a('Nuevo Usuario', ['/usuario/create'], ['class' => 'btn btn-outline-success']) ?>
+                            <?= Html::a('Gestionar Usuarios', ['/user/index'], ['class' => 'btn btn-success']) ?>
                         </div>
                     </div>
                 </div>
             </div>
+            <?php endif; ?>
             
             <div class="col-md-4 mb-4">
                 <div class="card h-100 shadow-sm">
                     <div class="card-body text-center">
-                        <i class="fas fa-exchange-alt fa-3x mb-3 text-info"></i>
-                        <h3 class="card-title">Préstamos</h3>
-                        <p class="card-text">Controla los préstamos y devoluciones de libros.</p>
+                        <i class="fas fa-book-reader fa-3x mb-3 text-info"></i>
+                        <h3 class="card-title">Mis Préstamos</h3>
+                        <p class="card-text">Consulta tus préstamos activos y devoluciones pendientes.</p>
                         <div class="mt-3">
-                            <?= Html::a('Ver Préstamos', ['/prestamo/index'], ['class' => 'btn btn-info']) ?>
-                            <?= Html::a('Nuevo Préstamo', ['/prestamo/create'], ['class' => 'btn btn-outline-info']) ?>
+                            <?= Html::a('Mis Préstamos', ['/prestamo/mis-prestamos'], ['class' => 'btn btn-info']) ?>
                         </div>
                     </div>
                 </div>
             </div>
         </div>
 
+        <?php if (Yii::$app->user->identity->puedeAdministrarLibros()): ?>
         <div class="row mt-4">
             <div class="col-md-6 mb-4">
                 <div class="card h-100 shadow-sm">
@@ -68,7 +93,6 @@ $this->title = 'Biblioteca Virtual';
                         <p class="card-text">Gestiona la información de los autores.</p>
                         <div class="mt-3">
                             <?= Html::a('Ver Autores', ['/autor/index'], ['class' => 'btn btn-warning']) ?>
-                            <?= Html::a('Nuevo Autor', ['/autor/create'], ['class' => 'btn btn-outline-warning']) ?>
                         </div>
                     </div>
                 </div>
@@ -82,13 +106,14 @@ $this->title = 'Biblioteca Virtual';
                         <p class="card-text">Organiza los libros por categorías.</p>
                         <div class="mt-3">
                             <?= Html::a('Ver Categorías', ['/categoria/index'], ['class' => 'btn btn-danger']) ?>
-                            <?= Html::a('Nueva Categoría', ['/categoria/create'], ['class' => 'btn btn-outline-danger']) ?>
                         </div>
                     </div>
                 </div>
             </div>
         </div>
+        <?php endif; ?>
 
+        <?php if (Yii::$app->user->identity->isAdmin()): ?>
         <div class="row mt-4">
             <div class="col-md-12">
                 <div class="card shadow-sm">
@@ -103,7 +128,7 @@ $this->title = 'Biblioteca Virtual';
                             </div>
                             <div class="col-md-3">
                                 <h5>Usuarios Activos</h5>
-                                <p class="h2 text-success"><?= \app\models\Usuario::find()->count() ?></p>
+                                <p class="h2 text-success"><?= \app\models\User::find()->count() ?></p>
                             </div>
                             <div class="col-md-3">
                                 <h5>Préstamos Activos</h5>
@@ -118,6 +143,8 @@ $this->title = 'Biblioteca Virtual';
                 </div>
             </div>
         </div>
+        <?php endif; ?>
+        <?php endif; ?>
     </div>
 </div>
 

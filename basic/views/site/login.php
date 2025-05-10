@@ -15,7 +15,9 @@ $this->params['breadcrumbs'][] = $this->title;
 <div class="site-login">
     <h1><?= Html::encode($this->title) ?></h1>
 
-    <p>Complete los siguientes campos para iniciar sesión o utilice uno de nuestros métodos de autenticación rápida:</p>
+    <div class="alert alert-info">
+        <p><i class="fas fa-info-circle"></i> Complete los siguientes campos para iniciar sesión o utilice uno de nuestros métodos de autenticación rápida.</p>
+    </div>
     
     <div class="row mb-4">
         <div class="col-lg-5">
@@ -40,7 +42,8 @@ $this->params['breadcrumbs'][] = $this->title;
                 ],
             ]); ?>
 
-            <?= $form->field($model, 'username')->textInput(['autofocus' => true]) ?>
+            <?= $form->field($model, 'username')->textInput(['autofocus' => true])->label('Usuario o Correo Electrónico') ?>
+            <div class="hint-block">Puede usar su nombre de usuario o correo electrónico para iniciar sesión.</div>
 
             <?= $form->field($model, 'password')->passwordInput() ?>
 
@@ -56,8 +59,12 @@ $this->params['breadcrumbs'][] = $this->title;
 
             <?php ActiveForm::end(); ?>
 
-            <div style="color:#999;">
-                Puede iniciar sesión con sus credenciales o registrarse como nuevo usuario en la sección <a href="<?= Url::to(['usuario/create']) ?>">Nuevo Usuario</a>.
+            <div class="mt-4 alert alert-secondary">
+                <p>Opciones adicionales:</p>
+                <ul>
+                    <li>¿No tiene una cuenta? <a href="<?= Url::to(['usuario/create']) ?>">Regístrese como usuario de la biblioteca</a>.</li>
+                    <li>¿Olvidó su contraseña? Contacte a un administrador para restablecerla.</li>
+                </ul>
             </div>
 
         </div>

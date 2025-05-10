@@ -21,6 +21,8 @@ use app\components\CustomFileValidator;
  * @property string $contrasena
  * @property string|null $imagen_perfil
  * @property string $fecha_registro
+ * 
+ * @property User[] $users Usuario del sistema vinculado a este usuario de biblioteca
  */
 class Usuario extends ActiveRecord implements IdentityInterface
 {
@@ -84,6 +86,25 @@ class Usuario extends ActiveRecord implements IdentityInterface
     public function getPrestamos()
     {
         return $this->hasMany(Prestamo::class, ['id_usuario' => 'id_usuario']);
+    }
+    
+    /**
+     * Gets query for [[Users]] - Usuarios del sistema vinculados a este usuario de biblioteca
+     *
+     * @return \yii\db\ActiveQuery
+     */
+    public function getUsers()
+    {
+        return $this->hasMany(User::class, ['id_usuario_biblioteca' => 'id_usuario']);
+    }
+    
+    /**
+     * Verifica si este usuario de biblioteca está vinculado con algún usuario del sistema
+     * @return boolean
+     */
+    public function tieneUsuarioVinculado()
+    {
+        return $this->getUsers()->exists();
     }
 
     /**
