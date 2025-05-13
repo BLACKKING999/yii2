@@ -64,7 +64,7 @@ class PrestamoSearch extends Prestamo
 
     public static function getUsuariosList()
     {
-        return ArrayHelper::map(Usuario::find()->all(), 'id_usuario', 'nombre');
+        return ArrayHelper::map(User::find()->all(), 'id_usuario', 'nombre');
     }
 
     public static function getLibrosList()

@@ -3,23 +3,21 @@
 namespace app\models;
 
 use Yii;
-use yii\behaviors\TimestampBehavior;
-use yii\db\ActiveRecord;
 
 /**
- * Este es el modelo para la tabla "usuarios_personal".
+ * This is the model class for table "usuarios_personal".
  *
  * @property int $id_personal
  * @property int $id_usuario
  * @property string|null $departamento
  * @property string|null $cargo
  * @property string|null $fecha_contratacion
- * @property int $created_at
- * @property int $updated_at
+ * @property int|null $created_at
+ * @property int|null $updated_at
  *
- * @property User $usuario
+ * @property User $user
  */
-class UsuarioPersonal extends ActiveRecord
+class UsuarioPersonal extends \yii\db\ActiveRecord
 {
     /**
      * {@inheritdoc}
@@ -27,16 +25,6 @@ class UsuarioPersonal extends ActiveRecord
     public static function tableName()
     {
         return 'usuarios_personal';
-    }
-    
-    /**
-     * {@inheritdoc}
-     */
-    public function behaviors()
-    {
-        return [
-            TimestampBehavior::class,
-        ];
     }
 
     /**
@@ -60,8 +48,8 @@ class UsuarioPersonal extends ActiveRecord
     public function attributeLabels()
     {
         return [
-            'id_personal' => 'ID',
-            'id_usuario' => 'Usuario',
+            'id_personal' => 'ID Personal',
+            'id_usuario' => 'ID Usuario',
             'departamento' => 'Departamento',
             'cargo' => 'Cargo',
             'fecha_contratacion' => 'Fecha de Contratación',
@@ -71,42 +59,49 @@ class UsuarioPersonal extends ActiveRecord
     }
 
     /**
-     * Gets query for [[Usuario]].
+     * Gets query for [[User]].
      *
      * @return \yii\db\ActiveQuery
      */
-    public function getUsuario()
+    public function getUser()
     {
-        return $this->hasOne(User::class, ['id_usuario' => 'id_usuario']);
+        return $this->hasOne(User::class, ['id_usuario' => 'id_usuario'])->with(['rol']);
     }
-    
+
     /**
      * Factory method para crear un nuevo personal a partir de un usuario existente
      * 
      * @param User $user Usuario base
-     * @param array $attributes Atributos específicos de personal
-     * @return UsuarioPersonal|null El objeto creado o null si falló
+     * @return UsuarioPersonal
      */
-    public static function crearDesdeUsuario($user, $attributes = [])
+    public static function crearDesdeUsuario(User $user)
     {
-        if (!$user || !$user->id_usuario) {
-            return null;
-        }
-        
         $personal = new self();
         $personal->id_usuario = $user->id_usuario;
-        
-        // Asignar atributos específicos
-        if (isset($attributes['departamento'])) {
-            $personal->departamento = $attributes['departamento'];
+        return $personal;
+    }
+
+    /**
+     * {@inheritdoc}
+     */
+    public function beforeSave($insert)
+    {
+        if (parent::beforeSave($insert)) {
+            if ($this->isNewRecord) {
+                $this->created_at = time();
+            }
+            $this->updated_at = time();
+            return true;
         }
-        if (isset($attributes['cargo'])) {
-            $personal->cargo = $attributes['cargo'];
-        }
-        if (isset($attributes['fecha_contratacion'])) {
-            $personal->fecha_contratacion = $attributes['fecha_contratacion'];
-        }
-        
-        return $personal->save() ? $personal : null;
+        return false;
+    }
+
+    /**
+     * Obtiene el nombre completo del usuario
+     * @return string
+     */
+    public function getNombreCompleto()
+    {
+        return $this->user ? $this->user->nombre . ' ' . $this->user->apellidos : '';
     }
 }

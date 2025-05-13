@@ -4,56 +4,105 @@ use yii\helpers\Html;
 use yii\widgets\DetailView;
 
 /* @var $this yii\web\View */
-/* @var $model app\models\Usuario */
+/* @var $model app\models\User */
 
-$this->title = $model->nombre;
-$this->params['breadcrumbs'][] = ['label' => 'Usuarios', 'url' => ['index']];
+$this->title = 'Mi Perfil';
 $this->params['breadcrumbs'][] = $this->title;
 ?>
-<div class="usuario-view">
-    <div class="row">
-        <div class="col-md-8">
-            <h1><?= Html::encode($this->title) ?></h1>
-        </div>
-        <div class="col-md-4 text-right">
-            <?= Html::a('Actualizar', ['update', 'id' => $model->id_usuario], ['class' => 'btn btn-primary']) ?>
-            <?= Html::a('Eliminar', ['delete', 'id' => $model->id_usuario], [
-                'class' => 'btn btn-danger',
-                'data' => [
-                    'confirm' => '¿Está seguro de eliminar este elemento?',
-                    'method' => 'post',
-                ],
-            ]) ?>
-        </div>
-    </div>
 
-    <div class="row mt-4">
+<div class="user-view">
+    <div class="row">
         <div class="col-md-4">
-            <?php if ($model->imagen_perfil): ?>
-                <img src="<?= $model->getImagenUrl() ?>" alt="Imagen de perfil" class="img-thumbnail mb-3" style="max-width: 100%;">
-            <?php else: ?>
-                <div class="alert alert-info">
-                    No hay imagen de perfil disponible
+            <div class="panel panel-primary">
+                <div class="panel-heading">
+                    <h3 class="panel-title">Foto de Perfil</h3>
+                </div>
+                <div class="panel-body text-center">
+                    <?= Html::img($model->getImagenUrl(), ['class' => 'img-thumbnail', 'style' => 'max-width: 200px;']) ?>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-8">
+            <div class="panel panel-primary">
+                <div class="panel-heading">
+                    <h3 class="panel-title">Información Personal</h3>
+                </div>
+                <div class="panel-body">
+                    <?= DetailView::widget([
+                        'model' => $model,
+                        'attributes' => [
+                            'username',
+                            'nombre',
+                            'apellidos',
+                            'email',
+                            'rol.nombre_rol',
+                            [
+                                'attribute' => 'fecha_registro',
+                                'format' => 'date',
+                            ],
+                        ],
+                    ]) ?>
+
+                    <div class="text-right">
+                        <?= Html::a('Actualizar Perfil', ['update', 'id_usuario' => $model->id_usuario], ['class' => 'btn btn-primary']) ?>
+                    </div>
+                </div>
+            </div>
+
+            <?php if ($model->esEstudiante()): ?>
+                <div class="panel panel-info">
+                    <div class="panel-heading">
+                        <h3 class="panel-title">Información de Estudiante</h3>
+                    </div>
+                    <div class="panel-body">
+                        <?= DetailView::widget([
+                            'model' => $model->usuarioEstudiante,
+                            'attributes' => [
+                                'carnet',
+                                'carrera',
+                                'semestre',
+                            ],
+                        ]) ?>
+                    </div>
                 </div>
             <?php endif; ?>
-        </div>
-        <div class="col-md-8">
-            <?= DetailView::widget([
-                'model' => $model,
-                'attributes' => [
-                    'id_usuario',
-                    'nombre',
-                    'correo',
-                    [
-                        'attribute' => 'es_google',
-                        'format' => 'boolean',
-                    ],
-                    [
-                        'attribute' => 'fecha_registro',
-                        'format' => ['date', 'php:d/m/Y H:i'],
-                    ],
-                ],
-            ]) ?>
+
+            <?php if ($model->esProfesor()): ?>
+                <div class="panel panel-info">
+                    <div class="panel-heading">
+                        <h3 class="panel-title">Información de Profesor</h3>
+                    </div>
+                    <div class="panel-body">
+                        <?= DetailView::widget([
+                            'model' => $model->usuarioProfesor,
+                            'attributes' => [
+                                'especialidad',
+                                'departamento',
+                                'oficina',
+                            ],
+                        ]) ?>
+                    </div>
+                </div>
+            <?php endif; ?>
+
+            <?php if ($model->esPersonal()): ?>
+                <div class="panel panel-info">
+                    <div class="panel-heading">
+                        <h3 class="panel-title">Información de Personal</h3>
+                    </div>
+                    <div class="panel-body">
+                        <?= DetailView::widget([
+                            'model' => $model->usuarioPersonal,
+                            'attributes' => [
+                                'departamento',
+                                'cargo',
+                                'fecha_contratacion:date',
+                            ],
+                        ]) ?>
+                    </div>
+                </div>
+            <?php endif; ?>
         </div>
     </div>
 </div>

@@ -5,12 +5,10 @@ namespace app\controllers;
 use Yii;
 use app\models\UsuarioPersonal;
 use app\models\UsuarioPersonalSearch;
-use app\models\User;
 use yii\web\Controller;
 use yii\web\NotFoundHttpException;
 use yii\filters\VerbFilter;
 use yii\filters\AccessControl;
-use yii\web\ForbiddenHttpException;
 
 /**
  * UsuarioPersonalController implementa las acciones CRUD para el modelo UsuarioPersonal.
@@ -25,22 +23,12 @@ class UsuarioPersonalController extends Controller
         return [
             'access' => [
                 'class' => AccessControl::class,
-                'only' => ['index', 'view', 'create', 'update', 'delete'],
                 'rules' => [
                     [
-                        'actions' => ['index', 'view'],
                         'allow' => true,
                         'roles' => ['@'],
                         'matchCallback' => function ($rule, $action) {
-                            return Yii::$app->user->identity->puedeAdministrarUsuarios();
-                        }
-                    ],
-                    [
-                        'actions' => ['create', 'update', 'delete'],
-                        'allow' => true,
-                        'roles' => ['@'],
-                        'matchCallback' => function ($rule, $action) {
-                            return Yii::$app->user->identity->puedeAdministrarUsuarios();
+                            return Yii::$app->user->identity && Yii::$app->user->identity->puedeAdministrarUsuarios();
                         }
                     ],
                 ],
@@ -62,6 +50,9 @@ class UsuarioPersonalController extends Controller
     {
         $searchModel = new UsuarioPersonalSearch();
         $dataProvider = $searchModel->search(Yii::$app->request->queryParams);
+        
+        // Cargar la relación con el usuario
+        $dataProvider->query->with(['user']);
 
         return $this->render('index', [
             'searchModel' => $searchModel,
@@ -70,10 +61,10 @@ class UsuarioPersonalController extends Controller
     }
 
     /**
-     * Muestra un modelo UsuarioPersonal específico.
+     * Muestra un único modelo UsuarioPersonal.
      * @param integer $id
      * @return mixed
-     * @throws NotFoundHttpException si el modelo no es encontrado
+     * @throws NotFoundHttpException si el modelo no se encuentra
      */
     public function actionView($id)
     {
@@ -84,41 +75,27 @@ class UsuarioPersonalController extends Controller
 
     /**
      * Crea un nuevo modelo UsuarioPersonal.
-     * Si se crea correctamente, el navegador será redirigido a la página 'view'.
      * @return mixed
      */
     public function actionCreate()
     {
         $model = new UsuarioPersonal();
-        $userModel = new User();
-        $userModel->scenario = User::SCENARIO_CREATE;
+        $userModel = new \app\models\User();
 
-        if ($userModel->load(Yii::$app->request->post()) && $model->load(Yii::$app->request->post())) {
-            
+        if ($model->load(Yii::$app->request->post()) && $userModel->load(Yii::$app->request->post())) {
             $transaction = Yii::$app->db->beginTransaction();
             try {
-                // Guardar el usuario primero
-                $userModel->setPassword($userModel->password);
-                $userModel->generateAuthKey();
-                
-                if (!$userModel->save()) {
-                    throw new \Exception('Error al guardar el usuario: ' . implode(', ', $userModel->getErrorSummary(true)));
+                if ($userModel->save()) {
+                    $model->id_usuario = $userModel->id_usuario;
+                    if ($model->save()) {
+                        $transaction->commit();
+                        return $this->redirect(['view', 'id' => $model->id_personal]);
+                    }
                 }
-                
-                // Asignar el id_usuario al personal
-                $model->id_usuario = $userModel->id_usuario;
-                
-                if (!$model->save()) {
-                    throw new \Exception('Error al guardar el personal: ' . implode(', ', $model->getErrorSummary(true)));
-                }
-                
-                $transaction->commit();
-                Yii::$app->session->setFlash('success', 'Personal creado correctamente.');
-                return $this->redirect(['view', 'id' => $model->id_personal]);
-                
+                $transaction->rollBack();
             } catch (\Exception $e) {
                 $transaction->rollBack();
-                Yii::$app->session->setFlash('error', $e->getMessage());
+                throw $e;
             }
         }
 
@@ -130,41 +107,26 @@ class UsuarioPersonalController extends Controller
 
     /**
      * Actualiza un modelo UsuarioPersonal existente.
-     * Si se actualiza correctamente, el navegador será redirigido a la página 'view'.
      * @param integer $id
      * @return mixed
-     * @throws NotFoundHttpException si el modelo no es encontrado
+     * @throws NotFoundHttpException si el modelo no se encuentra
      */
     public function actionUpdate($id)
     {
         $model = $this->findModel($id);
-        $userModel = User::findOne($model->id_usuario);
-        $userModel->scenario = User::SCENARIO_UPDATE;
+        $userModel = $model->user;
 
-        if ($userModel->load(Yii::$app->request->post()) && $model->load(Yii::$app->request->post())) {
-            
+        if ($model->load(Yii::$app->request->post()) && $userModel->load(Yii::$app->request->post())) {
             $transaction = Yii::$app->db->beginTransaction();
             try {
-                // Actualizar contraseña solo si se proporciona una nueva
-                if (!empty($userModel->password)) {
-                    $userModel->setPassword($userModel->password);
+                if ($userModel->save() && $model->save()) {
+                    $transaction->commit();
+                    return $this->redirect(['view', 'id' => $model->id_personal]);
                 }
-                
-                if (!$userModel->save()) {
-                    throw new \Exception('Error al actualizar el usuario: ' . implode(', ', $userModel->getErrorSummary(true)));
-                }
-                
-                if (!$model->save()) {
-                    throw new \Exception('Error al actualizar el personal: ' . implode(', ', $model->getErrorSummary(true)));
-                }
-                
-                $transaction->commit();
-                Yii::$app->session->setFlash('success', 'Personal actualizado correctamente.');
-                return $this->redirect(['view', 'id' => $model->id_personal]);
-                
+                $transaction->rollBack();
             } catch (\Exception $e) {
                 $transaction->rollBack();
-                Yii::$app->session->setFlash('error', $e->getMessage());
+                throw $e;
             }
         }
 
@@ -176,45 +138,33 @@ class UsuarioPersonalController extends Controller
 
     /**
      * Elimina un modelo UsuarioPersonal existente.
-     * Si se elimina correctamente, el navegador será redirigido a la página 'index'.
      * @param integer $id
      * @return mixed
-     * @throws NotFoundHttpException si el modelo no es encontrado
-     * @throws \Throwable
-     * @throws \yii\db\StaleObjectException
+     * @throws NotFoundHttpException si el modelo no se encuentra
      */
     public function actionDelete($id)
     {
         $model = $this->findModel($id);
-        $userId = $model->id_usuario;
-        
+        $userModel = $model->user;
+
         $transaction = Yii::$app->db->beginTransaction();
         try {
-            $model->delete();
-            
-            // Eliminar también el usuario asociado
-            $user = User::findOne($userId);
-            if ($user) {
-                $user->delete();
+            if ($model->delete() && $userModel->delete()) {
+                $transaction->commit();
+                return $this->redirect(['index']);
             }
-            
-            $transaction->commit();
-            Yii::$app->session->setFlash('success', 'Personal eliminado correctamente.');
-            
+            $transaction->rollBack();
         } catch (\Exception $e) {
             $transaction->rollBack();
-            Yii::$app->session->setFlash('error', 'Error al eliminar el personal: ' . $e->getMessage());
+            throw $e;
         }
-
-        return $this->redirect(['index']);
     }
 
     /**
-     * Busca el modelo UsuarioPersonal basado en su clave primaria.
-     * Si el modelo no es encontrado, se lanzará una excepción 404 HTTP.
+     * Encuentra el modelo UsuarioPersonal basado en su valor de clave primaria.
      * @param integer $id
      * @return UsuarioPersonal el modelo cargado
-     * @throws NotFoundHttpException si el modelo no es encontrado
+     * @throws NotFoundHttpException si el modelo no se encuentra
      */
     protected function findModel($id)
     {
@@ -222,6 +172,6 @@ class UsuarioPersonalController extends Controller
             return $model;
         }
 
-        throw new NotFoundHttpException('La página solicitada no existe.');
+        throw new NotFoundHttpException('El personal solicitado no existe.');
     }
 }

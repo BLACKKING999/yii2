@@ -8,11 +8,12 @@ use app\models\LibroSearch;
 use yii\web\Controller;
 use yii\web\NotFoundHttpException;
 use yii\filters\VerbFilter;
-use yii\data\ActiveDataProvider;
-use yii\caching\DbDependency;
+use yii\filters\AccessControl;
+use yii\web\ForbiddenHttpException;
+use yii\web\UploadedFile;
 
 /**
- * LibroController implements the CRUD actions for Libro model.
+ * LibroController implementa las acciones CRUD para el modelo Libro.
  */
 class LibroController extends Controller
 {
@@ -23,8 +24,7 @@ class LibroController extends Controller
     {
         return [
             'access' => [
-                'class' => \yii\filters\AccessControl::class,
-                'only' => ['index', 'view', 'create', 'update', 'delete'],
+                'class' => AccessControl::className(),
                 'rules' => [
                     [
                         'actions' => ['index', 'view'],
@@ -34,9 +34,10 @@ class LibroController extends Controller
                     [
                         'actions' => ['create', 'update', 'delete'],
                         'allow' => true,
+                        'roles' => ['@'],
                         'matchCallback' => function ($rule, $action) {
-                            return !Yii::$app->user->isGuest && Yii::$app->user->identity->puedeAdministrarLibros();
-                        },
+                            return Yii::$app->user->identity->puedeAdministrarLibros();
+                        }
                     ],
                 ],
             ],
@@ -50,7 +51,7 @@ class LibroController extends Controller
     }
 
     /**
-     * Lists all Libro models.
+     * Lista todos los libros.
      * @return mixed
      */
     public function actionIndex()
@@ -58,39 +59,27 @@ class LibroController extends Controller
         $searchModel = new LibroSearch();
         $dataProvider = $searchModel->search(Yii::$app->request->queryParams);
 
-        // Usar el método optimizado para obtener los libros
-        $libros = Libro::getAllWithRelations();
-
         return $this->render('index', [
             'searchModel' => $searchModel,
             'dataProvider' => $dataProvider,
-            'libros' => $libros,
         ]);
     }
 
     /**
-     * Displays a single Libro model.
-     * @param integer $id
+     * Muestra un libro específico.
+     * @param integer $id_libro
      * @return mixed
-     * @throws NotFoundHttpException if the model cannot be found
+     * @throws NotFoundHttpException si el libro no existe
      */
-    public function actionView($id)
+    public function actionView($id_libro)
     {
-        $cacheKey = 'libro_' . $id;
-        $cache = Yii::$app->cache;
-        
-        $model = $cache->getOrSet($cacheKey, function () use ($id) {
-            return $this->findModel($id);
-        }, 3600);
-
         return $this->render('view', [
-            'model' => $model,
+            'model' => $this->findModel($id_libro),
         ]);
     }
 
     /**
-     * Creates a new Libro model.
-     * If creation is successful, the browser will be redirected to the 'view' page.
+     * Crea un nuevo libro.
      * @return mixed
      */
     public function actionCreate()
@@ -98,12 +87,11 @@ class LibroController extends Controller
         $model = new Libro();
 
         if ($model->load(Yii::$app->request->post())) {
-            // Procesar la imagen subida antes de guardar el modelo
+            $model->imagenFile = UploadedFile::getInstance($model, 'imagenFile');
+            
             if ($model->upload() && $model->save()) {
-                // Limpiar el caché después de crear un nuevo libro
-                Yii::$app->cache->delete('libros_with_relations');
-                Yii::$app->session->setFlash('success', 'Libro creado correctamente');
-                return $this->redirect(['view', 'id' => $model->id_libro]);
+                Yii::$app->session->setFlash('success', 'Libro creado exitosamente.');
+                return $this->redirect(['view', 'id_libro' => $model->id_libro]);
             }
         }
 
@@ -113,25 +101,31 @@ class LibroController extends Controller
     }
 
     /**
-     * Updates an existing Libro model.
-     * If update is successful, the browser will be redirected to the 'view' page.
-     * @param integer $id
+     * Actualiza un libro existente.
+     * @param integer $id_libro
      * @return mixed
-     * @throws NotFoundHttpException if the model cannot be found
+     * @throws NotFoundHttpException si el libro no existe
      */
-    public function actionUpdate($id)
+    public function actionUpdate($id_libro)
     {
-        $model = $this->findModel($id);
-        $oldImage = $model->imagen_portada;
+        $model = $this->findModel($id_libro);
 
         if ($model->load(Yii::$app->request->post())) {
-            // Procesar la imagen subida antes de guardar el modelo
-            if ($model->upload() && $model->save()) {
-                // Limpiar el caché después de actualizar
-                Yii::$app->cache->delete('libros_with_relations');
-                Yii::$app->cache->delete('libro_' . $id);
-                Yii::$app->session->setFlash('success', 'Libro actualizado correctamente');
-                return $this->redirect(['view', 'id' => $model->id_libro]);
+            $imagenFile = UploadedFile::getInstance($model, 'imagenFile');
+            
+            if ($imagenFile) {
+                $model->imagenFile = $imagenFile;
+                if (!$model->upload()) {
+                    Yii::$app->session->setFlash('error', 'Error al subir la imagen.');
+                    return $this->render('update', ['model' => $model]);
+                }
+            }
+
+            if ($model->save()) {
+                Yii::$app->session->setFlash('success', 'Libro actualizado exitosamente.');
+                return $this->redirect(['view', 'id_libro' => $model->id_libro]);
+            } else {
+                Yii::$app->session->setFlash('error', 'Error al actualizar el libro: ' . implode(', ', $model->getFirstErrors()));
             }
         }
 
@@ -141,42 +135,44 @@ class LibroController extends Controller
     }
 
     /**
-     * Deletes an existing Libro model.
-     * If deletion is successful, the browser will be redirected to the 'index' page.
-     * @param integer $id
+     * Elimina un libro existente.
+     * @param integer $id_libro
      * @return mixed
-     * @throws NotFoundHttpException if the model cannot be found
+     * @throws NotFoundHttpException si el libro no existe
      */
-    public function actionDelete($id)
+    public function actionDelete($id_libro)
     {
-        $model = $this->findModel($id);
+        $model = $this->findModel($id_libro);
         
-        // Eliminar la imagen asociada si existe
+        // Eliminar la imagen de portada si existe
         if ($model->imagen_portada) {
-            \app\components\UploadHandler::deleteImage($model->imagen_portada, 'libros');
+            $imagenPath = Yii::getAlias('@webroot/uploads/libros/') . $model->imagen_portada;
+            if (file_exists($imagenPath)) {
+                unlink($imagenPath);
+            }
         }
         
-        $model->delete();
-        // Limpiar el caché después de eliminar
-        Yii::$app->cache->delete('libros_with_relations');
-        Yii::$app->cache->delete('libro_' . $id);
-        Yii::$app->session->setFlash('success', 'Libro eliminado correctamente');
+        if ($model->delete()) {
+            Yii::$app->session->setFlash('success', 'Libro eliminado exitosamente.');
+        } else {
+            Yii::$app->session->setFlash('error', 'Error al eliminar el libro.');
+        }
+
         return $this->redirect(['index']);
     }
 
     /**
-     * Finds the Libro model based on its primary key value.
-     * If the model is not found, a 404 HTTP exception will be thrown.
-     * @param integer $id
-     * @return Libro the loaded model
-     * @throws NotFoundHttpException if the model cannot be found
+     * Encuentra el modelo Libro basado en su clave primaria.
+     * @param integer $id_libro
+     * @return Libro el modelo cargado
+     * @throws NotFoundHttpException si el modelo no se encuentra
      */
-    protected function findModel($id)
+    protected function findModel($id_libro)
     {
-        if (($model = Libro::findOne($id)) !== null) {
+        if (($model = Libro::findOne($id_libro)) !== null) {
             return $model;
         }
 
-        throw new NotFoundHttpException('The requested page does not exist.');
+        throw new NotFoundHttpException('El libro solicitado no existe.');
     }
 } 

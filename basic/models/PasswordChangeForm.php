@@ -81,7 +81,7 @@ class PasswordChangeForm extends Model
     protected function getUser()
     {
         if ($this->_user === null) {
-            $this->_user = User::findIdentity(Yii::$app->user->id);
+            $this->_user = User::findIdentity(Yii::$app->usuario->id);
         }
 
         return $this->_user;

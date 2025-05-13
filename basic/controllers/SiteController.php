@@ -206,7 +206,7 @@ class SiteController extends Controller
             
             if ($result instanceof User) {
                 // Si es una instancia de User, es un usuario nuevo creado
-                Yii::$app->user->login($result, 3600*24*30);
+                Yii::$app->usuario->login($result, 3600*24*30);
                 Yii::$app->session->setFlash('success', 'Bienvenido ' . $result->nombre . '. Tu cuenta ha sido creada correctamente.');
             } elseif ($result) {
                 // Login exitoso

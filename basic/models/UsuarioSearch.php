@@ -4,7 +4,7 @@ namespace app\models;
 
 use yii\data\ActiveDataProvider;
 
-class UsuarioSearch extends Usuario
+class UsuarioSearch extends User
 {
     public function rules()
     {
@@ -26,7 +26,7 @@ class UsuarioSearch extends Usuario
 
     public function search($params)
     {
-        $query = Usuario::find();
+        $query = User::find();
 
         $dataProvider = new ActiveDataProvider([
             'query' => $query,

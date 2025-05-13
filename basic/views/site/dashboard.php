@@ -31,7 +31,7 @@ $user = Yii::$app->user->identity;
                     <p><strong>Tipo de usuario:</strong> <?= Html::encode(ucfirst($user->getTipoUsuario())) ?></p>
                     
                     <p>
-                        <?= Html::a('Editar Perfil', ['/user/update', 'id' => $user->id_usuario], ['class' => 'btn btn-primary']) ?>
+                        <?= Html::a('Editar Perfil', ['/usuario/update', 'id_usuario' => $user->id_usuario], ['class' => 'btn btn-primary']) ?>
                     </p>
                 </div>
             </div>
@@ -49,7 +49,7 @@ $user = Yii::$app->user->identity;
                                 <div class="well">
                                     <h4>Usuarios</h4>
                                     <p><i class="glyphicon glyphicon-user" style="font-size: 24px;"></i></p>
-                                    <?= Html::a('Gestionar Usuarios', ['/user/index'], ['class' => 'btn btn-info']) ?>
+                                    <?= Html::a('Gestionar Usuarios', ['/usuario/index'], ['class' => 'btn btn-info']) ?>
                                     <?= Html::a('Registrar Usuarios', ['/registro/index'], ['class' => 'btn btn-success', 'style' => 'margin-top: 5px;']) ?>
                                 </div>
                             </div>
@@ -101,7 +101,7 @@ $user = Yii::$app->user->identity;
                             </div>
                         <?php endif; ?>
                         
-                        <?php if ($user->puedeGestionarPrestamos()): ?>
+                        <?php if ($user->puedeAdministrarPrestamos()): ?>
                             <div class="col-md-4 text-center">
                                 <div class="well">
                                     <h4>Préstamos</h4>

@@ -7,6 +7,9 @@ use yii\base\Component;
 use yii\web\UploadedFile;
 use yii\helpers\FileHelper;
 
+/**
+ * Componente para manejar la subida de archivos
+ */
 class UploadHandler extends Component
 {
     /**

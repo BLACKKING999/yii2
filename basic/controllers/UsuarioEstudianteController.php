@@ -25,14 +25,13 @@ class UsuarioEstudianteController extends Controller
         return [
             'access' => [
                 'class' => AccessControl::class,
-                'only' => ['index', 'view', 'create', 'update', 'delete'],
                 'rules' => [
                     [
                         'actions' => ['index', 'view'],
                         'allow' => true,
                         'roles' => ['@'],
                         'matchCallback' => function ($rule, $action) {
-                            return Yii::$app->user->identity->puedeAdministrarUsuarios();
+                            return Yii::$app->user->identity && Yii::$app->user->identity->puedeAdministrarUsuarios();
                         }
                     ],
                     [
@@ -40,7 +39,7 @@ class UsuarioEstudianteController extends Controller
                         'allow' => true,
                         'roles' => ['@'],
                         'matchCallback' => function ($rule, $action) {
-                            return Yii::$app->user->identity->puedeAdministrarUsuarios();
+                            return Yii::$app->user->identity && Yii::$app->user->identity->puedeAdministrarUsuarios();
                         }
                     ],
                 ],

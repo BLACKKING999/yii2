@@ -7,14 +7,20 @@ use yii\data\ActiveDataProvider;
 use app\models\UsuarioProfesor;
 
 /**
- * UsuarioProfesorSearch represents the model behind the search form of `app\models\UsuarioProfesor`.
+ * UsuarioProfesorSearch representa el modelo detrás del formulario de búsqueda de `app\models\UsuarioProfesor`.
  */
 class UsuarioProfesorSearch extends UsuarioProfesor
 {
+    /**
+     * Propiedades para búsqueda en User
+     */
     public $username;
     public $nombre;
-    public $apellido;
+    public $apellidos;
     public $email;
+    public $especialidad;
+    public $departamento;
+    public $oficina;
 
     /**
      * {@inheritdoc}
@@ -22,9 +28,25 @@ class UsuarioProfesorSearch extends UsuarioProfesor
     public function rules()
     {
         return [
-            [['id_profesor', 'id_usuario', 'created_at', 'updated_at'], 'integer'],
-            [['especialidad', 'departamento', 'oficina', 'username', 'nombre', 'apellido', 'email'], 'safe'],
+            [['id_profesor', 'id_usuario', 'created_at', 'updated_at', 'id_usuario_biblioteca'], 'integer'],
+            [['especialidad', 'departamento', 'oficina', 'username', 'nombre', 'apellidos', 'email'], 'safe'],
         ];
+    }
+
+    /**
+     * {@inheritdoc}
+     */
+    public function attributeLabels()
+    {
+        return array_merge(parent::attributeLabels(), [
+            'username' => 'Usuario',
+            'nombre' => 'Nombre',
+            'apellidos' => 'Apellidos',
+            'email' => 'Correo electrónico',
+            'especialidad' => 'Especialidad',
+            'departamento' => 'Departamento',
+            'oficina' => 'Oficina',
+        ]);
     }
 
     /**
@@ -32,12 +54,11 @@ class UsuarioProfesorSearch extends UsuarioProfesor
      */
     public function scenarios()
     {
-        // bypass scenarios() implementation in the parent class
         return Model::scenarios();
     }
 
     /**
-     * Creates data provider instance with search query applied
+     * Crea una instancia de proveedor de datos con la consulta de búsqueda aplicada
      *
      * @param array $params
      *
@@ -46,22 +67,27 @@ class UsuarioProfesorSearch extends UsuarioProfesor
     public function search($params)
     {
         $query = UsuarioProfesor::find()
-            ->joinWith('usuario');
-
-        // add conditions that should always apply here
+            ->select([
+                'usuarios_profesores.*',
+                'usuarios.username',
+                'usuarios.nombre',
+                'usuarios.apellidos',
+                'usuarios.email'
+            ])
+            ->joinWith(['user']);
 
         $dataProvider = new ActiveDataProvider([
             'query' => $query,
             'sort' => [
-                'defaultOrder' => [
-                    'id_profesor' => SORT_DESC,
-                ],
+                'defaultOrder' => ['id_profesor' => SORT_DESC],
                 'attributes' => [
                     'id_profesor',
+                    'id_usuario',
                     'especialidad',
                     'departamento',
                     'oficina',
                     'created_at',
+                    'updated_at',
                     'username' => [
                         'asc' => ['usuarios.username' => SORT_ASC],
                         'desc' => ['usuarios.username' => SORT_DESC],
@@ -70,9 +96,9 @@ class UsuarioProfesorSearch extends UsuarioProfesor
                         'asc' => ['usuarios.nombre' => SORT_ASC],
                         'desc' => ['usuarios.nombre' => SORT_DESC],
                     ],
-                    'apellido' => [
-                        'asc' => ['usuarios.apellido' => SORT_ASC],
-                        'desc' => ['usuarios.apellido' => SORT_DESC],
+                    'apellidos' => [
+                        'asc' => ['usuarios.apellidos' => SORT_ASC],
+                        'desc' => ['usuarios.apellidos' => SORT_DESC],
                     ],
                     'email' => [
                         'asc' => ['usuarios.email' => SORT_ASC],
@@ -85,25 +111,26 @@ class UsuarioProfesorSearch extends UsuarioProfesor
         $this->load($params);
 
         if (!$this->validate()) {
-            // uncomment the following line if you do not want to return any records when validation fails
-            // $query->where('0=1');
             return $dataProvider;
         }
 
-        // grid filtering conditions
+        // Filtros para campos de UsuarioProfesor
         $query->andFilterWhere([
-            'id_profesor' => $this->id_profesor,
-            'id_usuario' => $this->id_usuario,
+            'usuarios_profesores.id_profesor' => $this->id_profesor,
+            'usuarios_profesores.id_usuario' => $this->id_usuario,
             'usuarios_profesores.created_at' => $this->created_at,
             'usuarios_profesores.updated_at' => $this->updated_at,
+            'usuarios_profesores.id_usuario_biblioteca' => $this->id_usuario_biblioteca,
         ]);
 
-        $query->andFilterWhere(['like', 'especialidad', $this->especialidad])
-            ->andFilterWhere(['like', 'departamento', $this->departamento])
-            ->andFilterWhere(['like', 'oficina', $this->oficina])
-            ->andFilterWhere(['like', 'usuarios.username', $this->username])
+        $query->andFilterWhere(['like', 'usuarios_profesores.especialidad', $this->especialidad])
+            ->andFilterWhere(['like', 'usuarios_profesores.departamento', $this->departamento])
+            ->andFilterWhere(['like', 'usuarios_profesores.oficina', $this->oficina]);
+
+        // Filtros para campos de User
+        $query->andFilterWhere(['like', 'usuarios.username', $this->username])
             ->andFilterWhere(['like', 'usuarios.nombre', $this->nombre])
-            ->andFilterWhere(['like', 'usuarios.apellido', $this->apellido])
+            ->andFilterWhere(['like', 'usuarios.apellidos', $this->apellidos])
             ->andFilterWhere(['like', 'usuarios.email', $this->email]);
 
         return $dataProvider;

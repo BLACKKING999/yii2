@@ -46,17 +46,13 @@ $this->params['breadcrumbs'][] = $this->title;
                 <div class="col-md-6">
                     <h4>Información de Profesor</h4>
                     
-                    <?= $form->field($profesor, 'num_empleado')->textInput(['maxlength' => true]) ?>
+                    <?= $form->field($profesor, 'id_usuario_biblioteca')->textInput(['maxlength' => true]) ?>
                     
                     <?= $form->field($profesor, 'departamento')->textInput(['maxlength' => true]) ?>
                     
                     <?= $form->field($profesor, 'especialidad')->textInput(['maxlength' => true]) ?>
                     
-                    <?= $form->field($profesor, 'tipo_contrato')->dropDownList([
-                        'Tiempo Completo' => 'Tiempo Completo',
-                        'Medio Tiempo' => 'Medio Tiempo',
-                        'Por Horas' => 'Por Horas'
-                    ], ['prompt' => 'Seleccione tipo de contrato']) ?>
+                    <?= $form->field($profesor, 'oficina')->textInput(['maxlength' => true]) ?>
                 </div>
             </div>
 

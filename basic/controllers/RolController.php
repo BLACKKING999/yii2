@@ -25,14 +25,13 @@ class RolController extends Controller
         return [
             'access' => [
                 'class' => AccessControl::class,
-                'only' => ['index', 'view', 'create', 'update', 'delete', 'asignar-permisos'],
                 'rules' => [
                     [
                         'actions' => ['index', 'view', 'create', 'update', 'delete', 'asignar-permisos'],
                         'allow' => true,
                         'roles' => ['@'],
                         'matchCallback' => function ($rule, $action) {
-                            return Yii::$app->user->identity->puedeAdministrarRoles();
+                            return Yii::$app->user->identity && Yii::$app->user->identity->puedeAdministrarRoles();
                         }
                     ],
                 ],

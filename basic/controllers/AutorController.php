@@ -8,15 +8,21 @@ use app\models\AutorSearch;
 use yii\web\Controller;
 use yii\web\NotFoundHttpException;
 use yii\filters\VerbFilter;
+use yii\filters\AccessControl;
 
+/**
+ * AutorController implementa las acciones CRUD para el modelo Autor.
+ */
 class AutorController extends Controller
 {
+    /**
+     * {@inheritdoc}
+     */
     public function behaviors()
     {
         return [
             'access' => [
-                'class' => \yii\filters\AccessControl::class,
-                'only' => ['index', 'view', 'create', 'update', 'delete'],
+                'class' => AccessControl::className(),
                 'rules' => [
                     [
                         'actions' => ['index', 'view'],

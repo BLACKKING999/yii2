@@ -10,14 +10,19 @@ use yii\web\NotFoundHttpException;
 use yii\filters\VerbFilter;
 use yii\filters\AccessControl;
 
+/**
+ * CategoriaController implementa las acciones CRUD para el modelo Categoria.
+ */
 class CategoriaController extends Controller
 {
+    /**
+     * {@inheritdoc}
+     */
     public function behaviors()
     {
         return [
             'access' => [
-                'class' => \yii\filters\AccessControl::class,
-                'only' => ['index', 'view', 'create', 'update', 'delete'],
+                'class' => AccessControl::className(),
                 'rules' => [
                     [
                         'actions' => ['index', 'view'],

@@ -3,7 +3,7 @@
 use yii\helpers\Html;
 use yii\widgets\ActiveForm;
 use yii\helpers\ArrayHelper;
-use app\models\Usuario;
+use app\models\User;
 use app\models\Libro;
 
 /** @var yii\web\View $this */
@@ -24,7 +24,7 @@ $this->params['breadcrumbs'][] = $this->title;
                 <div class="row">
                     <div class="col-md-6">
                         <?= $form->field($model, 'id_usuario')->dropDownList(
-                            ArrayHelper::map(Usuario::find()->all(), 'id_usuario', 'nombre'),
+                            ArrayHelper::map(User::find()->all(), 'id_usuario', 'nombre'),
                             ['prompt' => 'Seleccione un usuario']
                         ) ?>
                     </div>

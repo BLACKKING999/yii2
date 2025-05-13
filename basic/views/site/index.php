@@ -39,7 +39,7 @@ $this->title = 'Biblioteca Virtual';
         
         <?php if (!Yii::$app->user->isGuest): ?>
         <div class="row">
-            <?php if (Yii::$app->user->identity->puedeAdministrarLibros()): ?>
+            <?php if (Yii::$app->usuario->identity->puedeAdministrarLibros()): ?>
             <div class="col-md-4 mb-4">
                 <div class="card h-100 shadow-sm">
                     <div class="card-body text-center">
@@ -54,7 +54,7 @@ $this->title = 'Biblioteca Virtual';
             </div>
             <?php endif; ?>
             
-            <?php if (Yii::$app->user->identity->puedeAdministrarUsuarios()): ?>
+            <?php if (Yii::$app->usuario->identity->puedeAdministrarUsuarios()): ?>
             <div class="col-md-4 mb-4">
                 <div class="card h-100 shadow-sm">
                     <div class="card-body text-center">
@@ -83,7 +83,7 @@ $this->title = 'Biblioteca Virtual';
             </div>
         </div>
 
-        <?php if (Yii::$app->user->identity->puedeAdministrarLibros()): ?>
+        <?php if (Yii::$app->usuario->identity->puedeAdministrarLibros()): ?>
         <div class="row mt-4">
             <div class="col-md-6 mb-4">
                 <div class="card h-100 shadow-sm">
@@ -113,7 +113,7 @@ $this->title = 'Biblioteca Virtual';
         </div>
         <?php endif; ?>
 
-        <?php if (Yii::$app->user->identity->isAdmin()): ?>
+        <?php if (Yii::$app->usuario->identity->isAdmin()): ?>
         <div class="row mt-4">
             <div class="col-md-12">
                 <div class="card shadow-sm">

@@ -22,7 +22,7 @@ $this->params['breadcrumbs'][] = 'Actualizar';
                     <h3 class="panel-title">Datos de Usuario</h3>
                 </div>
                 <div class="panel-body">
-                    <?= $this->render('/user/_form_update', [
+                    <?= $this->render('/usuario/_form_update', [
                         'model' => $userModel,
                     ]) ?>
                 </div>

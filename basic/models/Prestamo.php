@@ -37,7 +37,7 @@ class Prestamo extends ActiveRecord
             [['id_usuario', 'id_libro'], 'integer'],
             [['fecha_prestamo', 'fecha_devolucion'], 'safe'],
             [['devuelto'], 'boolean'],
-            [['id_usuario'], 'exist', 'skipOnError' => true, 'targetClass' => Usuario::class, 'targetAttribute' => ['id_usuario' => 'id_usuario']],
+            [['id_usuario'], 'exist', 'skipOnError' => true, 'targetClass' => User::class, 'targetAttribute' => ['id_usuario' => 'id_usuario']],
             [['id_libro'], 'exist', 'skipOnError' => true, 'targetClass' => Libro::class, 'targetAttribute' => ['id_libro' => 'id_libro']],
         ];
     }
@@ -64,7 +64,7 @@ class Prestamo extends ActiveRecord
      */
     public function getUsuario()
     {
-        return $this->hasOne(Usuario::class, ['id_usuario' => 'id_usuario']);
+        return $this->hasOne(User::class, ['id_usuario' => 'id_usuario']);
     }
 
     /**

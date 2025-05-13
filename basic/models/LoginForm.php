@@ -75,14 +75,12 @@ class LoginForm extends Model
     {
         if ($this->validate()) {
             $user = $this->getUser();
-            $resultado = Yii::$app->user->login($user, $this->rememberMe ? 3600*24*30 : 0);
+            $resultado = Yii::$app->usuario->login($user, $this->rememberMe ? 3600*24*30 : 0);
             
             if ($resultado) {
-                // Actualizar último acceso si tenemos autenticación externa
-                if ($user && $externalAuth = AutenticacionExterna::findOne(['id_usuario' => $user->id_usuario])) {
-                    $externalAuth->ultimo_acceso = date('Y-m-d H:i:s');
-                    $externalAuth->save(false);
-                }
+                // Actualizar último acceso
+                $user->updated_at = time();
+                $user->save(false);
             }
             
             return $resultado;

@@ -28,8 +28,8 @@ return [
         'urlManager' => [
             'showScriptName' => true,
         ],
-        'user' => [
-            'identityClass' => 'app\models\User',
+        'usuario' => [
+            'identityClass' => 'app\models\Usuario',
         ],
         'request' => [
             'cookieValidationKey' => 'test',

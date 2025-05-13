@@ -11,13 +11,13 @@ use yii\db\ActiveRecord;
  *
  * @property int $id_profesor
  * @property int $id_usuario
- * @property string|null $especialidad
  * @property string|null $departamento
- * @property string|null $oficina
- * @property int $created_at
- * @property int $updated_at
+ * @property string|null $cargo
+ * @property string|null $fecha_contratacion
+ * @property int|null $created_at
+ * @property int|null $updated_at
  *
- * @property User $usuario
+ * @property User $user
  */
 class UsuarioProfesor extends ActiveRecord
 {
@@ -47,8 +47,8 @@ class UsuarioProfesor extends ActiveRecord
         return [
             [['id_usuario'], 'required'],
             [['id_usuario', 'created_at', 'updated_at'], 'integer'],
-            [['especialidad', 'departamento'], 'string', 'max' => 100],
-            [['oficina'], 'string', 'max' => 50],
+            [['fecha_contratacion'], 'safe'],
+            [['departamento', 'cargo'], 'string', 'max' => 100],
             [['id_usuario'], 'unique'],
             [['id_usuario'], 'exist', 'skipOnError' => true, 'targetClass' => User::class, 'targetAttribute' => ['id_usuario' => 'id_usuario']],
         ];
@@ -60,53 +60,60 @@ class UsuarioProfesor extends ActiveRecord
     public function attributeLabels()
     {
         return [
-            'id_profesor' => 'ID',
-            'id_usuario' => 'Usuario',
-            'especialidad' => 'Especialidad',
+            'id_profesor' => 'ID Profesor',
+            'id_usuario' => 'ID Usuario',
             'departamento' => 'Departamento',
-            'oficina' => 'Oficina',
+            'cargo' => 'Cargo',
+            'fecha_contratacion' => 'Fecha de Contratación',
             'created_at' => 'Creado en',
             'updated_at' => 'Actualizado en',
         ];
     }
 
     /**
-     * Gets query for [[Usuario]].
+     * Gets query for [[User]].
      *
      * @return \yii\db\ActiveQuery
      */
-    public function getUsuario()
+    public function getUser()
     {
-        return $this->hasOne(User::class, ['id_usuario' => 'id_usuario']);
+        return $this->hasOne(User::class, ['id_usuario' => 'id_usuario'])->with(['rol']);
     }
-    
+
     /**
      * Factory method para crear un nuevo profesor a partir de un usuario existente
      * 
      * @param User $user Usuario base
-     * @param array $attributes Atributos específicos de profesor
-     * @return UsuarioProfesor|null El objeto creado o null si falló
+     * @return UsuarioProfesor
      */
-    public static function crearDesdeUsuario($user, $attributes = [])
+    public static function crearDesdeUsuario(User $user)
     {
-        if (!$user || !$user->id_usuario) {
-            return null;
-        }
-        
         $profesor = new self();
         $profesor->id_usuario = $user->id_usuario;
-        
-        // Asignar atributos específicos
-        if (isset($attributes['especialidad'])) {
-            $profesor->especialidad = $attributes['especialidad'];
+        return $profesor;
+    }
+
+    /**
+     * {@inheritdoc}
+     */
+    public function beforeSave($insert)
+    {
+        if (parent::beforeSave($insert)) {
+            if ($this->isNewRecord) {
+                $this->created_at = time();
+            }
+            $this->updated_at = time();
+            return true;
         }
-        if (isset($attributes['departamento'])) {
-            $profesor->departamento = $attributes['departamento'];
-        }
-        if (isset($attributes['oficina'])) {
-            $profesor->oficina = $attributes['oficina'];
-        }
-        
-        return $profesor->save() ? $profesor : null;
+        return false;
+    }
+
+    /**
+     * Obtiene el nombre completo del usuario
+     * @return string
+     */
+    public function getNombreCompleto()
+    {
+        return $this->user ? $this->user->nombre . ' ' . $this->user->apellidos : '';
     }
 }

@@ -46,15 +46,13 @@ $this->params['breadcrumbs'][] = $this->title;
                 <div class="col-md-6">
                     <h4>Información de Personal</h4>
                     
-                    <?= $form->field($personal, 'num_empleado')->textInput(['maxlength' => true]) ?>
+                    <?= $form->field($personal, 'id_usuario_biblioteca')->textInput(['maxlength' => true]) ?>
                     
                     <?= $form->field($personal, 'departamento')->textInput(['maxlength' => true]) ?>
                     
                     <?= $form->field($personal, 'cargo')->textInput(['maxlength' => true]) ?>
                     
-                    <?= $form->field($personal, 'extension')->textInput(['maxlength' => true]) ?>
-                    
-                    <?= $form->field($personal, 'horario')->textInput(['maxlength' => true]) ?>
+                    <?= $form->field($personal, 'fecha_contratacion')->input('date') ?>
                 </div>
             </div>
 

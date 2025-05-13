@@ -10,23 +10,24 @@ use app\components\UploadHandler;
 use app\components\Validator;
 
 /**
- * This is the model class for table "libros".
+ * Modelo de libro
  *
- * @property int $id_libro
- * @property string|null $isbn
+ * @property integer $id_libro
+ * @property string $isbn
  * @property string $titulo
- * @property string|null $imagen_portada
- * @property int $id_autor
- * @property int $id_categoria
- * @property string|null $editorial
- * @property int $anio_publicacion
- * @property int|null $num_paginas
- * @property string|null $idioma
- * @property string|null $ubicacion_fisica
- * @property bool $disponible
- * @property string|null $descripcion
- * @property int|null $created_at
- * @property int|null $updated_at
+ * @property string $imagen_portada
+ * @property integer $id_autor
+ * @property integer $id_categoria
+ * @property string $editorial
+ * @property integer $anio_publicacion
+ * @property integer $num_paginas
+ * @property string $idioma
+ * @property string $ubicacion_fisica
+ * @property string $created_at
+ * @property string $updated_at
+ * @property boolean $disponible
+ * @property string $descripcion
+ * @property UploadedFile $imagenFile
  * 
  * @property Autor $autor
  * @property Categoria $categoria
@@ -34,6 +35,11 @@ use app\components\Validator;
  */
 class Libro extends ActiveRecord
 {
+    /**
+     * @var UploadedFile
+     */
+    public $imagenFile;
+
     /**
      * {@inheritdoc}
      */
@@ -48,24 +54,19 @@ class Libro extends ActiveRecord
     public function rules()
     {
         return [
-            [['titulo', 'id_autor', 'id_categoria', 'anio_publicacion'], 'required'],
-            [['id_autor', 'id_categoria', 'anio_publicacion', 'num_paginas', 'created_at', 'updated_at'], 'integer'],
+            [['isbn', 'titulo', 'id_autor', 'id_categoria', 'editorial', 'anio_publicacion', 'num_paginas', 'idioma', 'ubicacion_fisica'], 'required'],
+            [['id_autor', 'id_categoria', 'anio_publicacion', 'num_paginas'], 'integer'],
+            [['created_at', 'updated_at'], 'safe'],
             [['disponible'], 'boolean'],
             [['descripcion'], 'string'],
-            [['titulo'], 'string', 'max' => 150],
-            [['imagen_portada', 'ubicacion_fisica'], 'string', 'max' => 255],
-            [['isbn'], 'string', 'max' => 20],
-            [['editorial'], 'string', 'max' => 100],
+            [['isbn'], 'string', 'max' => 13],
+            [['titulo', 'editorial', 'ubicacion_fisica'], 'string', 'max' => 255],
             [['idioma'], 'string', 'max' => 50],
+            [['imagen_portada'], 'string', 'max' => 100],
+            [['isbn'], 'unique'],
+            [['imagenFile'], 'file', 'skipOnEmpty' => true, 'extensions' => ['png', 'jpg', 'jpeg'], 'maxSize' => 2 * 1024 * 1024, 'checkExtensionByMimeType' => false],
             [['id_autor'], 'exist', 'skipOnError' => true, 'targetClass' => Autor::class, 'targetAttribute' => ['id_autor' => 'id_autor']],
             [['id_categoria'], 'exist', 'skipOnError' => true, 'targetClass' => Categoria::class, 'targetAttribute' => ['id_categoria' => 'id_categoria']],
-            [['imagenFile'], 'file', 'skipOnEmpty' => true, 'extensions' => 'png, jpg, jpeg, gif', 'maxSize' => 2097152, 'checkExtensionByMimeType' => false],
-            // Nota: Desactivamos la validación customizada por ahora para evitar problemas con archivos temporales
-            // ['imagenFile', 'validateImage'],
-            ['anio_publicacion', 'integer', 'min' => 1800, 'max' => date('Y') + 2],
-            ['titulo', 'filter', 'filter' => function($value) {
-                return Validator::sanitizeHtml($value);
-            }],
         ];
     }
 
@@ -79,7 +80,6 @@ class Libro extends ActiveRecord
             'isbn' => 'ISBN',
             'titulo' => 'Título',
             'imagen_portada' => 'Imagen de Portada',
-            'imagenFile' => 'Imagen de Portada',
             'id_autor' => 'Autor',
             'id_categoria' => 'Categoría',
             'editorial' => 'Editorial',
@@ -87,16 +87,16 @@ class Libro extends ActiveRecord
             'num_paginas' => 'Número de Páginas',
             'idioma' => 'Idioma',
             'ubicacion_fisica' => 'Ubicación Física',
-            'disponible' => 'Disponible',
-            'descripcion' => 'Descripción',
             'created_at' => 'Fecha de Creación',
             'updated_at' => 'Fecha de Actualización',
+            'disponible' => 'Disponible',
+            'descripcion' => 'Descripción',
+            'imagenFile' => 'Imagen de Portada',
         ];
     }
 
     /**
-     * Gets query for [[Autor]].
-     *
+     * Obtiene la relación con el autor
      * @return \yii\db\ActiveQuery
      */
     public function getAutor()
@@ -105,8 +105,7 @@ class Libro extends ActiveRecord
     }
 
     /**
-     * Gets query for [[Categoria]].
-     *
+     * Obtiene la relación con la categoría
      * @return \yii\db\ActiveQuery
      */
     public function getCategoria()
@@ -116,7 +115,6 @@ class Libro extends ActiveRecord
 
     /**
      * Gets query for [[Prestamos]].
-     *
      * @return \yii\db\ActiveQuery
      */
     public function getPrestamos()
@@ -125,82 +123,79 @@ class Libro extends ActiveRecord
     }
 
     /**
-     * Propiedad para manejo de subida de archivos
-     */
-    public $imagenFile;
-
-    /**
-     * Validación personalizada para imágenes
-     */
-    public function validateImage($attribute, $params)
-    {
-        $file = UploadedFile::getInstance($this, $attribute);
-        if ($file) {
-            $result = Validator::validateImage($file);
-            if ($result !== true) {
-                $this->addError($attribute, $result);
-            }
-        }
-    }
-
-    /**
-     * Procesa la imagen subida
+     * Procesa la subida de imagen
+     * @return bool
      */
     public function upload()
     {
-        // Obtener el archivo antes de validar
-        $this->imagenFile = UploadedFile::getInstance($this, 'imagenFile');
-        
-        // Si no hay archivo que subir, retornar true
-        if (!$this->imagenFile) {
+        if ($this->imagenFile === null) {
             return true;
         }
+
+        $uploadPath = Yii::getAlias('@webroot/uploads/libros/');
         
-        // Crear directorios si no existen
-        $basePath = Yii::getAlias('@webroot/uploads/libros');
-        if (!is_dir($basePath)) {
-            mkdir($basePath, 0777, true);
+        // Crear directorio si no existe
+        if (!file_exists($uploadPath)) {
+            mkdir($uploadPath, 0777, true);
         }
-        
-        // En lugar de validar, verificar directamente la extensión
-        $extension = strtolower(pathinfo($this->imagenFile->name, PATHINFO_EXTENSION));
-        $allowedExtensions = ['jpg', 'jpeg', 'png', 'gif'];
-        
-        if (!in_array($extension, $allowedExtensions)) {
-            $this->addError('imagenFile', 'Solo se permiten imágenes (jpg, jpeg, png, gif)');
+
+        // Validar extensión
+        $extension = strtolower($this->imagenFile->extension);
+        if (!in_array($extension, ['png', 'jpg', 'jpeg'])) {
+            $this->addError('imagenFile', 'Solo se permiten archivos PNG, JPG o JPEG.');
             return false;
         }
-        
-        // Generar nombre único para el archivo
-        $fileName = uniqid('libro_') . '.' . $extension;
-        $filePath = $basePath . '/' . $fileName;
-        
-        // Eliminar imagen anterior si existe
-        if ($this->imagen_portada) {
-            $oldImagePath = $basePath . '/' . $this->imagen_portada;
-            if (file_exists($oldImagePath)) {
-                unlink($oldImagePath);
-            }
+
+        // Validar tamaño
+        if ($this->imagenFile->size > 2 * 1024 * 1024) {
+            $this->addError('imagenFile', 'El archivo no debe superar los 2MB.');
+            return false;
         }
-        
-        // Usar copy en lugar de saveAs para evitar problemas con archivos temporales
-        if (copy($this->imagenFile->tempName, $filePath)) {
+
+        $fileName = Yii::$app->security->generateRandomString() . '.' . $extension;
+        $filePath = $uploadPath . $fileName;
+
+        if ($this->imagenFile->saveAs($filePath)) {
+            // Eliminar imagen anterior si existe
+            if ($this->imagen_portada && file_exists($uploadPath . $this->imagen_portada)) {
+                unlink($uploadPath . $this->imagen_portada);
+            }
             $this->imagen_portada = $fileName;
             return true;
-        } else {
-            $this->addError('imagenFile', 'Error al guardar la imagen');
-            return false;
         }
+
+        $this->addError('imagenFile', 'Error al guardar la imagen.');
+        return false;
     }
 
     /**
      * Obtiene la URL de la imagen de portada
+     * @return string
      */
     public function getImagenUrl()
     {
-        return UploadHandler::getImageUrl($this->imagen_portada, 'libros');
+        if ($this->imagen_portada) {
+            return Yii::getAlias('@web/uploads/libros/') . $this->imagen_portada;
+        }
+        return Yii::getAlias('@web/images/no-image.png');
     }
-    
+
+    /**
+     * {@inheritdoc}
+     */
+    public function beforeSave($insert)
+    {
+        if (parent::beforeSave($insert)) {
+            if ($this->isNewRecord) {
+                $this->created_at = date('Y-m-d H:i:s');
+                $this->disponible = true;
+            }
+            $this->updated_at = date('Y-m-d H:i:s');
+            return true;
+        }
+        return false;
+    }
+
     /**
      * Getter virtual para la propiedad descripcion
      * @return string

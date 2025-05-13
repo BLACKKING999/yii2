@@ -127,7 +127,7 @@ $this->registerLinkTag(['rel' => 'icon', 'type' => 'image/x-icon', 'href' => Yii
                 <?php endif; ?>
                 <?php if (!Yii::$app->user->isGuest): ?>
                 <li>
-                    <a href="<?= \yii\helpers\Url::to(['/user/view', 'id' => Yii::$app->user->identity->id_usuario]) ?>">
+                    <a href="<?= \yii\helpers\Url::to(['/user/view', 'id_usuario' => Yii::$app->user->identity->id_usuario]) ?>">
                         <i class="fas fa-user-circle"></i> Mi Perfil
                     </a>
                 </li>
@@ -187,6 +187,7 @@ $this->registerLinkTag(['rel' => 'icon', 'type' => 'image/x-icon', 'href' => Yii
                         <?= Yii::$app->user->identity->rol ? Yii::$app->user->identity->rol->nombre_rol : 'Usuario' ?>
                     </small>
                 </div>
+               
                 <a href="<?= \yii\helpers\Url::to(['/site/logout']) ?>" data-method="post">
                     <i class="fas fa-sign-out-alt"></i> Cerrar Sesión (<?= Yii::$app->user->identity->username ?>)
                 </a>
@@ -197,18 +198,29 @@ $this->registerLinkTag(['rel' => 'icon', 'type' => 'image/x-icon', 'href' => Yii
 
 <!-- Header principal -->
 <header class="main-header">
-    <div class="container">
-        <a class="logo" href="<?= Yii::$app->homeUrl ?>">
-            <i class="fas fa-book-reader"></i> Biblioteca Virtual
-        </a>
+  <div class="container d-flex justify-content-between align-items-center">
+    <a class="logo" href="<?= Yii::$app->homeUrl ?>">
+      <i class="fas fa-book-reader"></i> Biblioteca Virtual
+    </a>
 
-        <?php if (!Yii::$app->user->isGuest): ?>
-            <div class="user-info text-white">
-                <i class="fas fa-user-circle"></i> 
-                Bienvenido, <?= Html::encode(Yii::$app->user->identity->nombre ?: Yii::$app->user->identity->username) ?>
-            </div>
-        <?php endif; ?>
-    </div>
+    <?php if (!Yii::$app->user->isGuest): ?>
+      <div class="user-info d-flex align-items-center text-white">
+       <?php if (!Yii::$app->user->isGuest && Yii::$app->user->identity->puedeAdministrarPrestamos()): ?>
+    <img 
+        src="<?= Yii::$app->user->identity->getImagenUrl() ?>" 
+        alt="Foto de perfil" 
+        class="rounded-circle"
+        style="width: 40px; height: 40px; object-fit: cover;"
+    >
+<?php endif; ?>
+
+        <i class="fas fa-user-circle me-2"></i>
+        <span>
+          Bienvenido, <?= Html::encode(Yii::$app->user->identity->nombre ?: Yii::$app->user->identity->username) ?>
+        </span>
+      </div>
+    <?php endif; ?>
+  </div>
 </header>
 
 <!-- Contenido principal -->

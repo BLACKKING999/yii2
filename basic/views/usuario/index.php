@@ -2,76 +2,81 @@
 
 use yii\helpers\Html;
 use yii\grid\GridView;
-use yii\helpers\Url;
+use yii\widgets\Pjax;
+
+/* @var $this yii\web\View */
+/* @var $searchModel app\models\UserSearch */
+/* @var $dataProvider yii\data\ActiveDataProvider */
 
 $this->title = 'Usuarios';
 $this->params['breadcrumbs'][] = $this->title;
 ?>
-<div class="usuario-index">
-    <div class="container">
-        <h1><?= Html::encode($this->title) ?></h1>
 
-        <p>
-            <?= Html::a('Agregar Nuevo Usuario', ['create'], ['class' => 'btn btn-success']) ?>
-        </p>
+<div class="user-index">
+    <div class="panel panel-primary">
+        <div class="panel-heading">
+            <h3 class="panel-title"><?= Html::encode($this->title) ?></h3>
+        </div>
+        <div class="panel-body">
+            <p>
+                <?= Html::a('Crear Usuario', ['create'], ['class' => 'btn btn-success']) ?>
+            </p>
 
-        <?= GridView::widget([
-            'dataProvider' => $dataProvider,
-            'filterModel' => $searchModel,
-            'columns' => [
-                ['class' => 'yii\grid\SerialColumn'],
-                [
-                    'attribute' => 'imagen_perfil',
-                    'format' => 'html',
-                    'label' => 'Imagen',
-                    'value' => function($model) {
-                        if ($model->imagen_perfil) {
-                            return Html::img($model->getImagenUrl(), ['style' => 'width: 50px; height: 50px; object-fit: cover;', 'class' => 'img-thumbnail']);
-                        } else {
-                            return Html::img(Url::to('@web/uploads/default.png'), ['style' => 'width: 50px; height: 50px; object-fit: cover;', 'class' => 'img-thumbnail']);
-                        }
-                    },
-                ],
-                'nombre',
-                'correo',
-                [
-                    'attribute' => 'es_google',
-                    'format' => 'boolean',
-                    'filter' => [0 => 'No', 1 => 'Sí'],
-                ],
-                [
-                    'attribute' => 'fecha_registro',
-                    'format' => ['date', 'php:d/m/Y'],
-                ],
-                [
-                    'class' => 'yii\grid\ActionColumn',
-                    'template' => '{view} {update} {delete}',
-                    'buttons' => [
-                        'view' => function ($url, $model) {
-                            return Html::a('<span class="glyphicon glyphicon-eye-open"></span>', $url, [
-                                'title' => 'Ver',
-                                'class' => 'btn btn-info btn-sm'
-                            ]);
+            <?php Pjax::begin(); ?>
+            <?= GridView::widget([
+                'dataProvider' => $dataProvider,
+                'filterModel' => $searchModel,
+                'columns' => [
+                    ['class' => 'yii\grid\SerialColumn'],
+                    'username',
+                    'nombre',
+                    'apellidos',
+                    'email',
+                    [
+                        'attribute' => 'id_rol',
+                        'value' => 'rol.nombre_rol',
+                        'filter' => \yii\helpers\ArrayHelper::map(\app\models\Rol::find()->all(), 'id_rol', 'nombre_rol'),
+                    ],
+                    [
+                        'attribute' => 'status',
+                        'value' => function ($model) {
+                            return $model->status == 10 ? 'Activo' : 'Inactivo';
                         },
-                        'update' => function ($url, $model) {
-                            return Html::a('<span class="glyphicon glyphicon-pencil"></span>', $url, [
-                                'title' => 'Editar',
-                                'class' => 'btn btn-primary btn-sm'
-                            ]);
-                        },
-                        'delete' => function ($url, $model) {
-                            return Html::a('<span class="glyphicon glyphicon-trash"></span>', $url, [
-                                'title' => 'Eliminar',
-                                'class' => 'btn btn-danger btn-sm',
-                                'data' => [
-                                    'confirm' => '¿Está seguro de eliminar este usuario?',
-                                    'method' => 'post',
-                                ],
-                            ]);
-                        },
+                        'filter' => [
+                            10 => 'Activo',
+                            0 => 'Inactivo',
+                        ],
+                    ],
+                    [
+                        'class' => 'yii\grid\ActionColumn',
+                        'template' => '{view} {update} {delete}',
+                        'buttons' => [
+                            'view' => function ($url, $model) {
+                                return Html::a('<span class="glyphicon glyphicon-eye-open"></span>', 
+                                    ['view', 'id_usuario' => $model->id_usuario], 
+                                    ['title' => 'Ver']);
+                            },
+                            'update' => function ($url, $model) {
+                                return Html::a('<span class="glyphicon glyphicon-pencil"></span>', 
+                                    ['update', 'id_usuario' => $model->id_usuario], 
+                                    ['title' => 'Actualizar']);
+                            },
+                            'delete' => function ($url, $model) {
+                                return Html::a('<span class="glyphicon glyphicon-trash"></span>', 
+                                    ['delete', 'id_usuario' => $model->id_usuario], 
+                                    [
+                                        'title' => 'Eliminar',
+                                        'data' => [
+                                            'confirm' => '¿Está seguro de eliminar este usuario?',
+                                            'method' => 'post',
+                                        ],
+                                    ]);
+                            },
+                        ],
                     ],
                 ],
-            ],
-        ]); ?>
+            ]); ?>
+            <?php Pjax::end(); ?>
+        </div>
     </div>
 </div> 

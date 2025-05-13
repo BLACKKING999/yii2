@@ -13,17 +13,21 @@ use yii\filters\VerbFilter;
 use yii\filters\AccessControl;
 use yii\web\ForbiddenHttpException;
 
+/**
+ * PrestamoController implementa las acciones CRUD para el modelo Prestamo.
+ */
 class PrestamoController extends Controller
 {
+    /**
+     * {@inheritdoc}
+     */
     public function behaviors()
     {
         return [
             'access' => [
                 'class' => AccessControl::className(),
                 'rules' => [
-                    // Acciones que cualquier usuario autenticado puede realizar
                     [
-                        'actions' => ['solicitar', 'reservar', 'mis-prestamos', 'mis-reservas', 'cancelar-reserva'],
                         'allow' => true,
                         'roles' => ['@'],
                     ],
@@ -46,6 +50,7 @@ class PrestamoController extends Controller
                     'reservar' => ['POST'],
                     'devolver' => ['POST'],
                     'cancelar-reserva' => ['POST'],
+                    'aprobar' => ['POST'],
                 ],
             ],
         ];

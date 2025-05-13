@@ -4,7 +4,7 @@ namespace app\controllers;
 
 use Yii;
 use app\models\UsuarioProfesor;
-use app\models\UsuarioProfesorSearch;
+use app\models\UsuarioProfesorSearch;   
 use app\models\User;
 use yii\web\Controller;
 use yii\web\NotFoundHttpException;
@@ -25,14 +25,13 @@ class UsuarioProfesorController extends Controller
         return [
             'access' => [
                 'class' => AccessControl::class,
-                'only' => ['index', 'view', 'create', 'update', 'delete'],
                 'rules' => [
                     [
                         'actions' => ['index', 'view'],
                         'allow' => true,
                         'roles' => ['@'],
                         'matchCallback' => function ($rule, $action) {
-                            return Yii::$app->user->identity->puedeAdministrarUsuarios();
+                            return Yii::$app->user->identity && Yii::$app->user->identity->puedeAdministrarUsuarios();
                         }
                     ],
                     [
@@ -40,7 +39,7 @@ class UsuarioProfesorController extends Controller
                         'allow' => true,
                         'roles' => ['@'],
                         'matchCallback' => function ($rule, $action) {
-                            return Yii::$app->user->identity->puedeAdministrarUsuarios();
+                            return Yii::$app->user->identity && Yii::$app->user->identity->puedeAdministrarUsuarios();
                         }
                     ],
                 ],
